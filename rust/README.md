@@ -1,0 +1,41 @@
+# Firmware Rust para ESP32
+
+Versión Rust del monitor de batería, DHT22 y GPS para las pantallas Waveshare ST7789V2 170 × 320 y SSD1306 128 × 64. Está configurada para el chip **ESP32 clásico** de una placa DevKit/WROOM-32 y usa ESP-IDF con Rust `std` mediante `esp-idf-svc`.
+
+## Pines
+
+| Función | GPIO |
+|---|---:|
+| LCD SPI SCK / MOSI | 18 / 23 |
+| LCD CS / DC / RST | 13 / 27 / 26 |
+| LCD BL | 3V3, luz fija |
+| OLED I2C SDA / SCL | 21 / 22 |
+| DHT22 DATA | 33 |
+| GPS UART RX / TX | 16 / 17 |
+| Voltaje ADC1 | 34 |
+
+El GPS se configura a 9600 baudios. El OLED usa I2C `0x3C`; el LCD usa un desplazamiento X de 35 píxeles.
+
+## Entrada de batería
+
+El módulo típico 0–25 V entrega hasta 5 V en su salida. Para limitar la entrada del ESP32, conecta `S` del módulo a GPIO34 mediante una resistencia de 12 kΩ y conecta otra resistencia de 10 kΩ entre GPIO34 y GND. Comparte GND entre ESP32, sensor de voltaje y batería. El cálculo usa la relación 5:1 del módulo más el divisor adicional 12 kΩ/10 kΩ; calibra `VOLTAGE_CALIBRATION` en `src/main.rs` con multímetro. No conectes la batería directamente al GPIO ni al pin 3V3.
+
+## Compilar y desplegar
+
+Para este chip Xtensa se requiere el compilador de Espressif, instalado por `espup`, además de `espflash` y `ldproxy` para generar y cargar una imagen. El proyecto usa ESP-IDF 5.4.2, igual que la versión C. La herramienta oficial se configura desde la [guía Rust on ESP](https://docs.espressif.com/projects/rust/book/getting-started/toolchain.html). Ejecuta el script una vez en la computadora de desarrollo; instala las herramientas en el perfil de usuario con Cargo y descarga las crates declaradas en `Cargo.toml`:
+
+```sh
+./scripts/install-deps.sh
+```
+
+El script genera el archivo de entorno como `rust/export-esp.sh`, lo ignora en Git y lo carga automáticamente al compilar. En otras terminales puedes cargarlo manualmente con `. ./export-esp.sh` desde `rust/`.
+
+## Compilar sin placa y cargar cuando esté disponible
+
+Desde `rust/`, ejecuta:
+
+```sh
+./scripts/build.sh
+```
+
+El ELF queda en `target/xtensa-esp32-espidf/release/esp32-monitor-rust` y la imagen de aplicación queda en `firmware.bin`. No hace falta conectar la placa para compilarlos. Cuando esté conectada por USB, ejecuta `./scripts/deploy.sh`. Para fijar el puerto serial, usa `ESP32_PORT=/dev/cu.usbserial-0001 ./scripts/deploy.sh`. El script vuelve a compilar y flashea el ELF con `espflash`; `firmware.bin` queda como artefacto separado para transferir o archivar. La referencia del flasher está en la [guía oficial de espflash](https://docs.espressif.com/projects/rust/book/getting-started/tooling/espflash.html).

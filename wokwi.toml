@@ -1,0 +1,8 @@
+[wokwi]
+version = 1
+firmware = 'c/build-wokwi/flasher_args.json'
+elf = 'c/build-wokwi/esp32_monitor_c.elf'
+
+[[net.forward]]
+from = 'localhost:8180'
+to = 'target:80'

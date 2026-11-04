@@ -1,0 +1,52 @@
+[package]
+name    = "esp32-monitor-rust"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+resolver = "2"
+
+# ── ESP-IDF std runtime ───────────────────────────────────────────────────
+[dependencies]
+esp-idf-svc = { version = "=0.53.0", features = [
+    "std",
+] }
+esp-idf-sys = { version = "=0.38.1", features = ["binstart"] }
+embedded-svc = "=0.29.0"
+
+# ── Displays ──────────────────────────────────────────────────────────────
+mipidsi               = "=0.10.0"
+display-interface-spi = "=0.5.0"
+ssd1306               = "=0.10.0"
+dht-sensor = "=0.3.0"
+
+# ── Graphics ──────────────────────────────────────────────────────────────
+embedded-graphics = "=0.8.2"
+
+# ── Utilities ─────────────────────────────────────────────────────────────
+heapless = "=0.8.0"
+log      = "=0.4"
+
+# ── anyhow for error handling ─────────────────────────────────────────────
+anyhow = { version = "=1.0", default-features = false }
+
+# ── Build ─────────────────────────────────────────────────────────────────
+[build-dependencies]
+embuild = "=0.33.7"
+
+# ── Profiles ──────────────────────────────────────────────────────────────
+[profile.release]
+codegen-units = 1
+debug         = 2
+opt-level     = "s"
+lto           = "thin"
+
+[profile.dev]
+opt-level = "s"
+
+# Coverage profile — used by cargo-llvm-cov on host target
+# cargo llvm-cov --lib --target x86_64-apple-darwin --profile coverage
+[profile.coverage]
+inherits        = "dev"
+opt-level       = 0
+debug           = 2
+overflow-checks = true

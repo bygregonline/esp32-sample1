@@ -1,0 +1,13 @@
+[extend]
+# Extender las reglas por defecto de gitleaks
+useDefault = true
+
+[allowlist]
+description = "Allowlist for ESP32 project"
+regexes = [
+  # Clave pública de ejemplo para el AP local de configuración
+  '''monitor1234''',
+]
+paths = [
+  '''.*\.example''',
+]

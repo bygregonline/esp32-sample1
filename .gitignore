@@ -1,0 +1,139 @@
+# ═══════════════════════════════════════════════════════════════
+#  ESP32 Telemetry Monitor — root .gitignore
+# ═══════════════════════════════════════════════════════════════
+
+# ── Build artefacts (all toolchains) ──────────────────────────
+build/
+build-wokwi/
+dist/
+target/
+out/
+.pio/
+_build/
+
+# ── Firmware / linker / compiler outputs ──────────────────────
+*.bin
+*.elf
+*.hex
+*.uf2
+*.map
+*.o
+*.a
+*.d
+*.lst
+*.dSYM/
+*.idb
+*.pdb
+firmware.bin
+
+# ── ESP-IDF specific ──────────────────────────────────────────
+sdkconfig
+sdkconfig.old
+sdkconfig.wokwi
+sdkconfig.ci
+dependencies.lock
+managed_components/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+x509_crt_bundle
+*.log
+
+# ── Rust / Cargo ──────────────────────────────────────────────
+# Cargo.lock is committed for binaries (embedded firmware)
+# Do NOT add Cargo.lock here
+rust/export-esp.sh
+rust/firmware.bin
+rust/target/
+rust/.embuild/
+
+# ── Python / MicroPython ──────────────────────────────────────
+.venv/
+venv/
+.venv*/
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg/
+dist/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.prof
+
+# MicroPython compiled bytecode
+*.mpy
+
+# Wi-Fi credentials saved on board (mpremote pull artefact)
+python/wifi_creds.json
+
+# ── Arduino ───────────────────────────────────────────────────
+arduino/build/
+arduino/dist/
+arduino/esp32_monitor/build/
+
+# ── Secrets / credentials ─────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.toml
+secrets.json
+wifi_creds.json
+
+# detect-secrets baseline (committed, not ignored)
+# .secrets.baseline  ← keep this line commented; the file IS committed
+
+# ── Editor / OS ───────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
+.fleet/
+*.swp
+*.swo
+*~
+*.tmp
+*.bak
+*.orig
+
+# ── Espressif tooling ─────────────────────────────────────────
+eim_config.toml
+export-esp.sh
+.espressif/
+
+# ── Visual drafts (keep the approved wiring and display references) ──
+docs/visuals/*
+!docs/visuals/diagrama-conexiones-esp32.png
+!docs/visuals/mockup-displays-esp32.png
+
+# ── pre-commit cache ──────────────────────────────────────────
+.pre-commit-cache/
+
+# ── GitHub Actions local runners ──────────────────────────────
+act/
+.act/
+
+# ── Misc ──────────────────────────────────────────────────────
+codex.resume
+*.resume
+node_modules/
+.history/

@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "author": "ESP32 Monitor C",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 5,
+      "left": 10,
+      "attrs": {}
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled",
+      "top": 10,
+      "left": 280,
+      "attrs": { "i2cAddress": "0x3c" }
+    },
+    {
+      "type": "wokwi-ili9341",
+      "id": "tft",
+      "top": 190,
+      "left": 280,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht",
+      "top": 90,
+      "left": 500,
+      "attrs": { "temperature": "24", "humidity": "45" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "battery",
+      "top": 300,
+      "left": 500,
+      "attrs": { "value": "341" }
+    }
+  ],
+  "connections": [
+    [ "esp:D21", "oled:SDA", "green", [] ],
+    [ "esp:D22", "oled:SCL", "blue", [] ],
+    [ "esp:3V3", "oled:VCC", "red", [] ],
+    [ "esp:GND.1", "oled:GND", "black", [] ],
+
+    [ "esp:D18", "tft:SCK", "blue", [] ],
+    [ "esp:D23", "tft:MOSI", "green", [] ],
+    [ "esp:D13", "tft:CS", "orange", [] ],
+    [ "esp:D27", "tft:D/C", "purple", [] ],
+    [ "esp:3V3", "tft:VCC", "red", [] ],
+    [ "esp:GND.1", "tft:GND", "black", [] ],
+
+    [ "esp:D33", "dht:SDA", "green", [] ],
+    [ "esp:3V3", "dht:VCC", "red", [] ],
+    [ "esp:GND.1", "dht:GND", "black", [] ],
+
+    [ "esp:D34", "battery:SIG", "orange", [] ],
+    [ "esp:3V3", "battery:VCC", "red", [] ],
+    [ "esp:GND.1", "battery:GND", "black", [] ],
+
+    [ "esp:TX0", "$serialMonitor:RX", "green", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "green", [] ]
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,10 @@
+menu "Monitor ESP32"
+
+config MONITOR_WOKWI_SIMULATION
+    bool "Build the Wokwi simulation profile"
+    default n
+    help
+        Connect to Wokwi-GUEST, use a fixed test GPS position, and do not start
+        the Wi-Fi setup access point. Leave disabled for the physical ESP32.
+
+endmenu

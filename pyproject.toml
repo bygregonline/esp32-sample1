@@ -1,0 +1,89 @@
+[project]
+name = "esp32-telemetry-mpremote"
+version = "0.1.0"
+description = "Host tools, tests and deploy scripts for the ESP32 telemetry monitor"
+requires-python = ">=3.12,<3.13"
+dependencies = ["mpremote"]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.1",
+    "pytest-xdist>=3.6",       # parallel test execution
+    "coverage[toml]>=7.6",
+    "requests>=2.32",           # integration tests
+    "ruff>=0.11",
+]
+
+# ── pytest ────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+minversion   = "8.0"
+testpaths    = ["tests/python", "tests/integration"]
+addopts      = [
+    "--tb=short",
+    "--strict-markers",
+    "-ra",                      # show summary of all non-passing
+    "--cov=python",             # measure coverage of the firmware sources
+    "--cov=tests",              # include test helpers themselves
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html:coverage/python/html",
+    "--cov-report=xml:coverage/python/coverage.xml",
+    "--cov-fail-under=80",
+]
+markers = [
+    "live: requires a real ESP32 device (set ESP32_IP env var)",
+    "slow: tests that take more than 5 seconds",
+]
+
+# ── coverage.py ───────────────────────────────────────────────────────────
+[tool.coverage.run]
+branch   = true
+parallel = true
+source   = ["python"]
+omit = [
+    "python/main.py",            # hardware loop; exercised by API contract tests, not traced for host coverage
+    "python/st7789.py",         # hardware-only display driver
+    "python/ssd1306.py",        # hardware-only display driver
+    "python/wifi_creds.json",
+    "tests/*",
+    ".venv/*",
+]
+
+[tool.coverage.report]
+show_missing          = true
+skip_covered          = true
+skip_empty            = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "def main\\(\\):",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
+]
+fail_under = 80
+
+[tool.coverage.html]
+directory = "coverage/python/html"
+title     = "ESP32 Python/MicroPython Coverage"
+
+[tool.coverage.xml]
+output = "coverage/python/coverage.xml"
+
+# ── ruff ──────────────────────────────────────────────────────────────────
+[tool.ruff]
+target-version = "py312"
+line-length     = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",  # line length (handled by formatter)
+    "B008",  # function calls in defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*"    = ["S101"]   # assert is fine in tests
+"python/*"   = ["UP"]     # MicroPython doesn't support all modern syntax

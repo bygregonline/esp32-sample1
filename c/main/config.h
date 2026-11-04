@@ -1,0 +1,29 @@
+#pragma once
+
+// Mapa de pines para ESP32 DevKit/WROOM-32 clásico.
+#define LCD_SPI_HOST SPI2_HOST
+#define LCD_SCK_GPIO GPIO_NUM_18
+#define LCD_MOSI_GPIO GPIO_NUM_23
+#define LCD_CS_GPIO GPIO_NUM_13
+#define LCD_DC_GPIO GPIO_NUM_27
+#define LCD_RST_GPIO GPIO_NUM_26
+#define LCD_WIDTH 170
+#define LCD_HEIGHT 320
+#define LCD_X_OFFSET 35
+
+#define OLED_I2C_PORT I2C_NUM_0
+#define OLED_SDA_GPIO GPIO_NUM_21
+#define OLED_SCL_GPIO GPIO_NUM_22
+#define OLED_I2C_ADDRESS 0x3C
+
+#define DHT_GPIO GPIO_NUM_33
+#define GPS_UART_PORT UART_NUM_1
+#define GPS_RX_GPIO GPIO_NUM_16
+#define GPS_TX_GPIO GPIO_NUM_17
+#define GPS_BAUD 9600
+
+#define VOLTAGE_ADC_UNIT ADC_UNIT_1
+#define VOLTAGE_ADC_CHANNEL ADC_CHANNEL_6  // GPIO34
+#define VOLTAGE_SENSOR_RATIO 5.0f
+#define ADC_EXTERNAL_DIVIDER_RATIO 2.2f  // (12 kΩ + 10 kΩ) / 10 kΩ
+#define VOLTAGE_CALIBRATION 1.0f         // Ajustar con multímetro

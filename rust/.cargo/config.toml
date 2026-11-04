@@ -1,0 +1,16 @@
+[target.xtensa-esp32-espidf]
+linker = "ldproxy"
+# runner = "espflash flash --monitor"  # descomentar para flash directo
+
+[build]
+target = "xtensa-esp32-espidf"
+
+[env]
+# Apunta a tu instalación de ESP-IDF. cargo-xtensa / esp-idf-sys puede
+# gestionarlo automáticamente si ESP_IDF_VERSION está definido.
+ESP_IDF_VERSION = "v5.4.2"
+# Si tienes IDF instalado manualmente, define la ruta:
+# IDF_PATH = "/path/to/esp-idf"
+
+[unstable]
+build-std = ["std", "panic_abort"]
