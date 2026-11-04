@@ -4,9 +4,15 @@ Implementación para ESP32 DevKit/WROOM-32 clásico con LCD Waveshare ST7789V2 d
 
 ## Diagramas y pantallas
 
+### Montaje con protoboard
+
 ![Montaje del ESP32 centrado entre dos secciones de protoboard](../docs/visuals/diagrama-conexiones-esp32-protoboard.png)
 
+### Diagrama general de conexiones
+
 ![Diagrama de conexiones del ESP32](../docs/visuals/diagrama-conexiones-esp32.png)
+
+### Diseño de referencia de las pantallas
 
 ![Vista de referencia de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32.png)
 

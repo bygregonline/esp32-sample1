@@ -9,9 +9,15 @@ Los controladores de pantalla y el parser GPS están incluidos. No hay paquetes 
 
 ## Diagramas y pantallas
 
+### Montaje con protoboard
+
 ![Montaje del ESP32 centrado entre dos secciones de protoboard](../docs/visuals/diagrama-conexiones-esp32-protoboard.png)
 
+### Diagrama general de conexiones
+
 ![Diagrama de conexiones del ESP32](../docs/visuals/diagrama-conexiones-esp32.png)
+
+### Vista de las pantallas
 
 ![Vista esperada de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32.png)
 

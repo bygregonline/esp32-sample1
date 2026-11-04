@@ -125,6 +125,7 @@ docs/visuals/*
 !docs/visuals/diagrama-conexiones-esp32.png
 !docs/visuals/mockup-displays-esp32.png
 !docs/visuals/diagrama-conexiones-esp32-protoboard.png
+!docs/visuals/hero-esp32-telemetry.png
 
 # ── pre-commit cache ──────────────────────────────────────────
 .pre-commit-cache/
