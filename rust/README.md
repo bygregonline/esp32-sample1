@@ -2,6 +2,16 @@
 
 Versión Rust del monitor de batería, DHT22 y GPS para las pantallas Waveshare ST7789V2 170 × 320 y SSD1306 128 × 64. Está configurada para el chip **ESP32 clásico** de una placa DevKit/WROOM-32 y usa ESP-IDF con Rust `std` mediante `esp-idf-svc`.
 
+## Diagramas y pantallas
+
+![Montaje del ESP32 centrado entre dos secciones de protoboard](../docs/visuals/diagrama-conexiones-esp32-protoboard.png)
+
+![Diagrama de conexiones del ESP32](../docs/visuals/diagrama-conexiones-esp32.png)
+
+![Vista esperada de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32.png)
+
+El montaje muestra las pantallas a la izquierda del ESP32 y los sensores a la derecha. El [README principal](../README.md#wiring-diagrams-and-display-mockup) describe las filas y resistencias; los GPIO de esta versión se declaran en `src/main.rs`.
+
 ## Pines
 
 | Función | GPIO |

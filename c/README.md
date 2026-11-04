@@ -2,6 +2,16 @@
 
 Proyecto C para ESP-IDF 5.x y ESP32 clásico (DevKit/WROOM-32, Xtensa). No requiere tener la placa conectada para compilar; el archivo `.bin` se puede guardar y flashear cuando haya hardware disponible.
 
+## Diagramas y pantallas
+
+![Montaje del ESP32 centrado entre dos secciones de protoboard](../docs/visuals/diagrama-conexiones-esp32-protoboard.png)
+
+![Diagrama de conexiones del ESP32](../docs/visuals/diagrama-conexiones-esp32.png)
+
+![Vista esperada de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32.png)
+
+El montaje coloca el ESP32 al centro, las pantallas a la izquierda y los sensores a la derecha. Consulta el [mapa de filas y resistencias](../README.md#wiring-diagrams-and-display-mockup) antes de cablear; los GPIO efectivos están en [`main/config.h`](main/config.h).
+
 ## Qué incluye
 
 - LCD Waveshare ST7789V2 de 170 × 320 por SPI, desplazamiento X 35.

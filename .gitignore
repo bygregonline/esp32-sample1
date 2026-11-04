@@ -124,6 +124,7 @@ export-esp.sh
 docs/visuals/*
 !docs/visuals/diagrama-conexiones-esp32.png
 !docs/visuals/mockup-displays-esp32.png
+!docs/visuals/diagrama-conexiones-esp32-protoboard.png
 
 # ── pre-commit cache ──────────────────────────────────────────
 .pre-commit-cache/

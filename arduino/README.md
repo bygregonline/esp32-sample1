@@ -2,6 +2,16 @@
 
 Implementación para ESP32 DevKit/WROOM-32 clásico con LCD Waveshare ST7789V2 de 170 × 320, OLED SSD1306 de 128 × 64, sensor DHT22, GPS NEO-6M y lectura analógica de batería.
 
+## Diagramas y pantallas
+
+![Montaje del ESP32 centrado entre dos secciones de protoboard](../docs/visuals/diagrama-conexiones-esp32-protoboard.png)
+
+![Diagrama de conexiones del ESP32](../docs/visuals/diagrama-conexiones-esp32.png)
+
+![Vista de referencia de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32.png)
+
+El montaje muestra las pantallas a la izquierda del ESP32 y los sensores a la derecha. El [README principal](../README.md#wiring-diagrams-and-display-mockup) describe las filas y resistencias. La imagen de las pantallas corresponde al diseño de las versiones con clima y servidor web; este sketch de Arduino muestra sensores y GPS, sin pronóstico.
+
 ## Compilar con Arduino CLI
 
 Arduino CLI permite preparar, compilar y subir el mismo sketch desde terminal o desde el terminal integrado de VS Code, sin extensión adicional. En macOS se puede instalar con Homebrew:

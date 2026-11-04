@@ -7,6 +7,16 @@ Proyecto para un ESP32 DevKit/WROOM-32 que presenta voltaje de batería, tempera
 
 Los controladores de pantalla y el parser GPS están incluidos. No hay paquetes de terceros que instalar en la placa.
 
+## Diagramas y pantallas
+
+![Montaje del ESP32 centrado entre dos secciones de protoboard](../docs/visuals/diagrama-conexiones-esp32-protoboard.png)
+
+![Diagrama de conexiones del ESP32](../docs/visuals/diagrama-conexiones-esp32.png)
+
+![Vista esperada de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32.png)
+
+El montaje muestra las pantallas a la izquierda del ESP32 y los sensores a la derecha. Las filas y resistencias del protoboard se detallan en el [README principal](../README.md#wiring-diagrams-and-display-mockup); los pines usados por MicroPython están en `config.py`.
+
 ## Pines predeterminados
 
 Los pines corresponden a un ESP32 DevKit/WROOM-32 común. Si tu placa es otra variante, revisa su pinout y cambia `config.py`.

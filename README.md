@@ -48,9 +48,15 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
 - **GPS:** u-blox NEO-6M, UART 9600 baud
 - **Battery voltage:** 0–25 V module (5:1 divider) + external 12 kΩ/10 kΩ divider into ADC1 GPIO34
 
-### Wiring and display references
+### Wiring diagrams and display mockup
 
 ![ESP32 wiring diagram](docs/visuals/diagrama-conexiones-esp32.png)
+
+![ESP32 centered between two solderless breadboard sections](docs/visuals/diagrama-conexiones-esp32-protoboard.png)
+
+The ESP32 sits between two separate breadboard sections so the displays can connect on the left and the sensors on the right. Each five-hole strip connects horizontally; the power rails connect vertically. Numbered rows on opposite sections are isolated unless a jumper explicitly joins them. Insulated wires that pass over a rail connect only at their marked endpoint holes.
+
+The left section uses rows 3/5/39/34/32 for LCD SCK/MOSI/CS/DC/RST and rows 7/9 for OLED SCL/SDA. The right section uses row 51 for DHT22 DATA, rows 34/32 for GPS TX/RX, row 55 for the divided ADC output, and row 58 for the voltage module's raw S signal. The shown cross-section jumpers join rows 3, 5, 7, 9, 51, and 55 only. Place the 12 kΩ resistor between right-side rows 58 and 55, the 10 kΩ resistor between right-side row 55 and ground, and the DHT22 4.7 kΩ pull-up between right-side row 51 and 3V3.
 
 ![Expected LCD and OLED screens](docs/visuals/mockup-displays-esp32.png)
 
