@@ -133,3 +133,13 @@ repos:
       - id: markdownlint
         args: ["--config", ".markdownlint.yaml", "--fix"]
         files: ^.*\.md$
+
+  # ── Generated root README ───────────────────────────────────
+  - repo: local
+    hooks:
+      - id: generate-readme
+        name: regenerate root README
+        entry: python3 scripts/generate_readme.py
+        language: system
+        always_run: true
+        pass_filenames: false

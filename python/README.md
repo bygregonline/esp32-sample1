@@ -7,6 +7,8 @@ Proyecto para un ESP32 DevKit/WROOM-32 que presenta voltaje de batería, tempera
 
 Los controladores de pantalla y el parser GPS están incluidos. No hay paquetes de terceros que instalar en la placa.
 
+La referencia de módulos MicroPython se genera con MkDocs y `mkdocstrings-python`: desde la raíz ejecuta `uv sync --group dev` y `./scripts/build_docs.sh`. Las dependencias de documentación están en el grupo `dev` del `pyproject.toml`; la salida queda en `site/`.
+
 ## Diagramas y pantallas
 
 ### Montaje con protoboard

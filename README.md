@@ -1,5 +1,7 @@
 # ESP32 Telemetry Monitor
 
+[![ESP32 platform](https://img.shields.io/badge/platform-ESP32-E7352C?logo=espressif&logoColor=white)](https://www.espressif.com/en/products/socs/esp32) [![MIT or Apache 2.0 license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](LICENSE-MIT) [![C ESP-IDF](https://img.shields.io/badge/C-ESP--IDF-00599C?logo=c&logoColor=white)](c/README.md) [![MicroPython](https://img.shields.io/badge/MicroPython-ESP32-2B5B84?logo=python&logoColor=white)](python/README.md) [![Rust](https://img.shields.io/badge/Rust-ESP32-000000?logo=rust&logoColor=white)](rust/README.md) [![Arduino](https://img.shields.io/badge/Arduino-ESP32-00878F?logo=arduino&logoColor=white)](arduino/README.md) [![Last commit](https://img.shields.io/github/last-commit/bygregonline/esp32-sample1)](https://github.com/bygregonline/esp32-sample1/commits/master)
+
 ## Abstract
 
 This project was generated 100% by artificial intelligence to test mixed capabilities across firmware, web servers, documentation, and hardware diagrams. The experiment focuses on respecting sandbox boundaries and keeping the repository and low-level ESP32 server code well structured for bare-metal-class hardware. It is free to use under either the [MIT License](LICENSE-MIT) or the [Apache License 2.0](LICENSE-APACHE).
@@ -35,6 +37,7 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
   - [POST /wifi](#post-wifi)
 - [curl examples](#curl-examples)
 - [Project structure](#project-structure)
+- [Documentation](#documentation)
 - [Building and flashing](#building-and-flashing)
   - [C / ESP-IDF](#c--esp-idf)
   - [Python / MicroPython](#python--micropython)
@@ -439,8 +442,18 @@ curl -X POST http://<IP>/api/config/interval \
 ```text
 .
 ├── README.md            ← this file
+├── README.template.md   ← ordered README section template
+├── structure.md         ← README content and badge data
+├── mkdocs.yml           ← documentation site navigation and plugins
 ├── API.md               ← full API reference with all curl examples
 ├── CHANGES.md           ← session change log
+├── docs/                ← MkDocs pages and approved hardware visuals
+├── supportfiles/
+│   ├── 3d/               ← printable OpenSCAD enclosure model and preview
+│   └── cnc/              ← 1:1 acrylic cutting layout and preview
+├── scripts/
+│   ├── generate_readme.py  render README and repository snapshot
+│   └── build_docs.sh       MkDocs + Python, C, and Rust API documentation
 │
 ├── c/                   ← C / ESP-IDF 5.x (source of truth)
 │   ├── main/
@@ -494,6 +507,34 @@ curl -X POST http://<IP>/api/config/interval \
         ├── install-deps.sh  arduino-cli core + libraries
         ├── build.sh         compile → dist/
         └── deploy.sh        compile + upload via arduino-cli
+```
+
+---
+
+## Documentation
+
+The root README is generated from [`structure.md`](structure.md) and [`README.template.md`](README.template.md). Edit those source files, then render or check the result:
+
+```sh
+python3 scripts/generate_readme.py
+python3 scripts/generate_readme.py --check
+```
+
+The pre-commit hook also renders `README.md`; stage the generated file if the hook updates it.
+
+The MkDocs skeleton includes hardware, HTTP API, and implementation pages. Its Python reference is generated from source docstrings with `mkdocstrings`. MkDocs, its theme, and the Python handler are in the `uv` development dependency group:
+
+```sh
+uv sync --group dev
+./scripts/build_docs.sh
+```
+
+The site is written to ignored `site/`. Optional native API generators add C Doxygen and Rust rustdoc HTML to that site:
+
+```sh
+./scripts/build_docs.sh --c-api     # requires Doxygen installed separately
+./scripts/build_docs.sh --rust-api  # requires the ESP Rust toolchain
+./scripts/build_docs.sh --all       # both native generators
 ```
 
 ---
@@ -666,3 +707,29 @@ curl -X POST http://localhost:8180/api/config/interval \
 ## License
 
 This project is dual-licensed under the MIT License or Apache License, Version 2.0. You may choose either license for your use. See [LICENSE-MIT](LICENSE-MIT) and [LICENSE-APACHE](LICENSE-APACHE).
+
+## Prototype fabrication files
+
+The repository includes two enclosure concepts for the assembled MVP. Both place the color LCD and OLED on the front, keep the ESP32 accessible behind them, and use a desktop viewing angle.
+
+### 3D-printed prototype
+
+[![3D-printed ESP32 telemetry enclosure concept — click to rotate the STL on GitHub](supportfiles/3d/preview.png)](supportfiles/3d/esp32_mvp_assembly.stl)
+
+The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [assembled STL](supportfiles/3d/esp32_mvp_assembly.stl) are included. The clickable preview opens GitHub's interactive STL viewer; individual [front](supportfiles/3d/esp32_mvp_front.stl), [rear](supportfiles/3d/esp32_mvp_back.stl), and [side](supportfiles/3d/esp32_mvp_side.stl) files are the print parts (print two sides). Dimensions and export instructions are in [supportfiles/3d/README.md](supportfiles/3d/README.md).
+
+### CNC-cut acrylic prototype
+
+![CNC-cut acrylic ESP32 telemetry enclosure concept](supportfiles/cnc/preview.png)
+
+The [1:1 metric SVG layout](supportfiles/cnc/esp32_mvp_acrylic_panels.svg) contains the front and rear panels and two angled side cheeks for screw assembly. Import at 100% in millimetres and configure tool compensation in CAM. See [supportfiles/cnc/README.md](supportfiles/cnc/README.md) for setup and cut dimensions.
+
+Both concepts are fit-check prototypes. The Waveshare LCD body is 27.3 × 51.2 mm; generic SSD1306 boards vary, so measure the specific display modules and adjust the model or cutting profile before fabrication. The preview PNGs illustrate the concept; use the SCAD and SVG files for geometry.
+
+## Repository snapshot
+
+- **Last source commit:** [`c88306f`](https://github.com/bygregonline/esp32-sample1/commit/c88306f36445c0344e7c48373145efcbc962f2cd)
+- **Commit date:** 2026-11-04T14:44:03-06:00
+- **Repository size:** 8.2 MiB across 118 project files (generated `README.md` excluded)
+
+_Snapshot captured when this README was generated._

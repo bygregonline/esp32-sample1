@@ -1,0 +1,36 @@
+site_name: ESP32 Telemetry Monitor
+site_description: Firmware, wiring, API, and build documentation for the ESP32 telemetry project
+site_url: https://bygregonline.github.io/esp32-sample1/
+repo_url: https://github.com/bygregonline/esp32-sample1
+docs_dir: docs
+site_dir: site
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: blue
+    accent: cyan
+nav:
+  - Home: index.md
+  - Hardware: hardware.md
+  - Implementations:
+      - C / ESP-IDF: c.md
+      - MicroPython: python.md
+      - Rust: rust.md
+      - Arduino: arduino.md
+  - HTTP API: api.md
+  - Source reference:
+      - C: reference/c.md
+      - Python: reference/python.md
+      - Rust: reference/rust.md
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [python]
+          options:
+            show_source: true
+            show_if_no_docstring: true
+            members_order: source

@@ -32,6 +32,10 @@ El montaje coloca el ESP32 al centro, las pantallas a la izquierda y los sensore
 
 Los pines y factores están en [`main/config.h`](main/config.h). Para el voltaje usa el divisor documentado en el README raíz: resistencia de 12 kΩ entre salida `S` del módulo y GPIO34, y resistencia de 10 kΩ entre GPIO34 y GND. Calibra `VOLTAGE_CALIBRATION` comparando con un multímetro.
 
+## Documentación
+
+Desde la raíz del repositorio, `./scripts/build_docs.sh` genera el sitio MkDocs. Para añadir la referencia de funciones y encabezados C, ejecuta `./scripts/build_docs.sh --c-api`; esta opción requiere Doxygen instalado aparte de las dependencias de desarrollo administradas por `uv`. El resultado queda en `site/api/c/` y se ignora en Git.
+
 ## Compilar sin placa y desplegar cuando esté disponible
 
 Instala ESP-IDF siguiendo la [guía oficial de Espressif](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html) y activa su entorno en la terminal. El SDK y las herramientas se instalan con el instalador oficial de Espressif, porque el proceso depende del sistema operativo. Después, configura las dependencias del proyecto:

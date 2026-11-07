@@ -32,6 +32,10 @@ El montaje muestra las pantallas a la izquierda del ESP32 y los sensores a la de
 
 El GPS se configura a 9600 baudios. El OLED usa I2C `0x3C`; el LCD usa un desplazamiento X de 35 píxeles.
 
+## Documentación
+
+Desde la raíz del repositorio, `./scripts/build_docs.sh` genera el sitio MkDocs. Para añadir la referencia nativa de los módulos Rust, ejecuta `./scripts/build_docs.sh --rust-api`; usa `cargo doc` y requiere el entorno Xtensa preparado por `rust/scripts/install-deps.sh`. El HTML queda en `site/api/rust/` y se ignora en Git.
+
 ## Entrada de batería
 
 El módulo típico 0–25 V entrega hasta 5 V en su salida. Para limitar la entrada del ESP32, conecta `S` del módulo a GPIO34 mediante una resistencia de 12 kΩ y conecta otra resistencia de 10 kΩ entre GPIO34 y GND. Comparte GND entre ESP32, sensor de voltaje y batería. El cálculo usa la relación 5:1 del módulo más el divisor adicional 12 kΩ/10 kΩ; calibra `VOLTAGE_CALIBRATION` en `src/main.rs` con multímetro. No conectes la batería directamente al GPIO ni al pin 3V3.

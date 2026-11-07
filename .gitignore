@@ -8,6 +8,7 @@ build-wokwi/
 dist/
 target/
 out/
+site/
 .pio/
 _build/
 
