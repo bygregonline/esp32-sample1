@@ -485,8 +485,11 @@ curl -X POST http://<IP>/api/config/interval \
 ├── CHANGES.md           ← session change log
 ├── docs/                ← MkDocs pages and approved hardware visuals
 ├── supportfiles/
-│   ├── 3d/               ← printable OpenSCAD enclosure model and preview
-│   └── cnc/              ← 1:1 acrylic cutting layout and preview
+│   ├── 3d/               ← OpenSCAD source, assembly/print STLs, preview
+│   └── cnc/              ← 2.8 mm acrylic profiles, GRBL files, preview
+│       ├── esp32_mvp_acrylic_panels.svg
+│       ├── generate_grbl.py
+│       └── gcode/         ← front, rear, and side GRBL .nc files
 ├── scripts/
 │   ├── generate_readme.py  render README and repository snapshot
 │   └── build_docs.sh       MkDocs + Python, C, and Rust API documentation
@@ -758,6 +761,6 @@ The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [ass
 
 ![CNC-cut acrylic ESP32 telemetry enclosure concept](supportfiles/cnc/preview.png)
 
-The [1:1 metric SVG layout](supportfiles/cnc/esp32_mvp_acrylic_panels.svg) contains the front and rear panels and two angled side cheeks for screw assembly. Import at 100% in millimetres and configure tool compensation in CAM. See [supportfiles/cnc/README.md](supportfiles/cnc/README.md) for setup and cut dimensions.
+The [1:1 metric SVG layout](supportfiles/cnc/esp32_mvp_acrylic_panels.svg) contains the front and rear panels and two angled side cheeks for 2.8 mm acrylic. Separate [GRBL files](supportfiles/cnc/gcode/) are provided for the 3018: [front](supportfiles/cnc/gcode/esp32_mvp_front_grbl.nc), [rear](supportfiles/cnc/gcode/esp32_mvp_rear_grbl.nc), and [side cheek](supportfiles/cnc/gcode/esp32_mvp_side_grbl.nc), which is cut twice. They assume a 3.175 mm single-flute cutter and need the controller and cutter settings checked before use. See [supportfiles/cnc/README.md](supportfiles/cnc/README.md).
 
 Both concepts are fit-check prototypes. The Waveshare LCD body is 27.3 × 51.2 mm; generic SSD1306 boards vary, so measure the specific display modules and adjust the model or cutting profile before fabrication. The preview PNGs illustrate the concept; use the SCAD and SVG files for geometry.

@@ -6,16 +6,27 @@ This folder contains a 1:1 metric SVG cutting layout for a screw-assembled acryl
 
 ## Files
 
-- `esp32_mvp_acrylic_panels.svg` — CNC profile layout in millimetres. Red paths are through-cuts. Each part is labeled and nested on a 300 × 200 mm sheet.
-- `preview.svg` — vector source for the preview image.
-- `preview.png` — rendered concept view; use the cutting SVG for geometry.
+- `esp32_mvp_acrylic_panels.svg` — 1:1 CNC profile layout in millimetres. Red paths are through-cuts; the sheet is a layout reference, not one job for the 3018 bed.
+- `generate_grbl.py` — standard-library script that regenerates the per-part NC files.
+- `gcode/` — separate GRBL toolpaths for the front, rear, and side panel; cut two side panels.
+- `preview.png` — photorealistic acrylic prototype concept; use the cutting SVG for geometry.
 
 ## Cut list and setup
 
-The layout includes one 145 × 92 mm front panel, one 145 × 82 mm rear panel, and two side cheeks with an 82 × 118 mm envelope. Front-panel openings are 24 × 44 mm (LCD), 27 × 20 mm (OLED), and 3.4 mm mounting holes. Side-cheek edges form the tilted desktop stand. The design targets 3 mm acrylic, M3 screws/nuts, and eight small right-angle brackets joining the cheeks to the front and rear panels. Use washers to avoid point-loading the acrylic.
+The layout includes one 145 × 92 mm front panel, one 145 × 82 mm rear panel, and two side cheeks with an 82 × 118 mm envelope. Front-panel openings are 24 × 44 mm (LCD), 27 × 20 mm (OLED), and 4.2 mm clearance holes for M3 fasteners. Side-cheek edges form the tilted desktop stand. The design targets 2.8 mm acrylic, M3 screws/nuts, and eight small right-angle brackets joining the cheeks to the front and rear panels. Use washers to avoid point-loading the acrylic.
+
+## 3018 Pro starter G-code
+
+The `gcode/` files use common GRBL 1.1 syntax and cut one panel at a time so every blank fits within a typical 3018 work area. The settings assume a 3.175 mm single-flute end mill, 2.8 mm acrylic, 300 mm/min cutting feed, 80 mm/min plunge, 0.35 mm step-down, and GRBL spindle scale `$30=1000`. They leave 0.5 mm tabs on each outside profile. The listing does not identify the exact control board or cutter, so these are starter files: confirm the board reports GRBL 1.1 and match the actual cutter and spindle settings before running. If the included cutter differs, edit the constants in `generate_grbl.py` and regenerate the files.
+
+Each program assumes the XY work zero is the lower-left corner of a blank with the listed size and Z zero is the top of the acrylic. Secure the blank to a sacrificial board, verify the displayed toolpath in the Linux sender (for example, Candle or UGS), and perform an air pass above the stock first. The side-panel file cuts one cheek; run it twice. The outside is held by 0.5 mm tabs after machining; remove the tabs by hand.
+
+```sh
+python3 supportfiles/cnc/generate_grbl.py
+```
 
 Import the SVG at 100% scale with units set to mm. Confirm the CNC/CAM software interprets the viewBox as millimetres, apply tool compensation for the actual bit diameter, and add dogbones only if your assembly requires them. Run a small scale check before cutting the full sheet. Do not scale to fit the sheet.
 
-The cutouts are starting dimensions. Waveshare lists the 1.9-inch module body as 27.3 × 51.2 mm and the display area as 22.7 × 42.72 mm. The generic 0.96-inch SSD1306 board is not specified by the project; board dimensions and mounting-hole positions vary by vendor. Measure the actual modules and tune the SVG before machining. The SVG uses nominal module windows, not vendor-specific PCB mounting holes.
+The cutouts are starting dimensions. Waveshare lists the 1.9-inch module body as 27.3 × 51.2 mm and the display area as 22.7 × 42.72 mm. The generic 0.96-inch SSD1306 board is not specified by the project; board dimensions and mounting-hole positions vary by vendor. Measure the actual modules and tune the SVG before machining. The SVG uses nominal module windows, not vendor-specific PCB mounting holes. The render is an appearance reference; it may include assembly details that are not represented by the cutting profiles.
 
 The SVG contains profiles only; it does not encode toolpaths, feeds, speeds, or tabs. Set those in the CAM software for the acrylic thickness and cutter being used.
