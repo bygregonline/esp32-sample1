@@ -7,6 +7,10 @@ Proyecto para un ESP32 DevKit/WROOM-32 que presenta voltaje de batería, tempera
 
 Los controladores de pantalla y el parser GPS están incluidos. No hay paquetes de terceros que instalar en la placa.
 
+### TensorFlow Lite Micro
+
+La versión MicroPython conserva el firmware estándar y no ejecuta el modelo TensorFlow Lite Micro. Para el ejemplo que ejercita inferencia `float32` en el CPU/FPU del ESP32 (el chip no tiene TPU), usa la versión C o Rust; ambas ejecutan el mismo modelo publicado mediante un componente nativo de ESP-IDF. Incluir TFLM en MicroPython requeriría compilar y flashear un firmware MicroPython personalizado con un módulo C/C++ integrado; copiar archivos `.py` no agrega ese runtime.
+
 La referencia de módulos MicroPython se genera con MkDocs y `mkdocstrings-python`: desde la raíz ejecuta `uv sync --group dev` y `./scripts/build_docs.sh`. Las dependencias de documentación están en el grupo `dev` del `pyproject.toml`; la salida queda en `site/`.
 
 ## Diagramas y pantallas

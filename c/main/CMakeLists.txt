@@ -3,5 +3,5 @@ idf_component_register(
     INCLUDE_DIRS "."
     REQUIRES driver esp_adc
     PRIV_REQUIRES esp_timer esp_wifi esp_event esp_netif nvs_flash
-                  esp_http_server esp_http_client esp-tls mbedtls json
+                  esp_http_server esp_http_client esp-tls mbedtls json tflm_demo
 )

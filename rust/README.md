@@ -40,6 +40,12 @@ Desde la raíz del repositorio, `./scripts/build_docs.sh` genera el sitio MkDocs
 
 El módulo típico 0–25 V entrega hasta 5 V en su salida. Para limitar la entrada del ESP32, conecta `S` del módulo a GPIO34 mediante una resistencia de 12 kΩ y conecta otra resistencia de 10 kΩ entre GPIO34 y GND. Comparte GND entre ESP32, sensor de voltaje y batería. El cálculo usa la relación 5:1 del módulo más el divisor adicional 12 kΩ/10 kΩ; calibra `VOLTAGE_CALIBRATION` en `src/main.rs` con multímetro. No conectes la batería directamente al GPIO ni al pin 3V3.
 
+## TensorFlow Lite Micro: prueba float32
+
+Rust ejecuta el mismo modelo de demostración `hello_world` que C mediante el componente nativo compartido [`components/tflm_demo/`](../components/tflm_demo/). Usamos TensorFlow Lite Micro para ejercitar inferencia `float32` en el CPU/FPU del ESP32 clásico. Este chip tiene FPU, no TPU; la prueba valida la integración del runtime, no es una prueba de TPU ni un benchmark. El modelo aproxima `sin(x)`; el firmware normaliza temperatura y humedad del DHT22 y las ejecuta en llamadas separadas. Si el DHT22 no está disponible, usa el voltaje de batería. Las predicciones aparecen en el monitor serial bajo `TFLM demo`; no son pronósticos ambientales ni alteran el API.
+
+El proyecto Rust declara el componente compartido en `Cargo.toml`; ESP-IDF Component Manager descarga `espressif/esp-tflite-micro` al compilar. La interfaz C se consume mediante FFI desde [`src/ml_demo.rs`](src/ml_demo.rs).
+
 ## Compilar y desplegar
 
 Para este chip Xtensa se requiere el compilador de Espressif, instalado por `espup`, además de `espflash` y `ldproxy` para generar y cargar una imagen. El proyecto usa ESP-IDF 5.4.2, igual que la versión C. La herramienta oficial se configura desde la [guía Rust on ESP](https://docs.espressif.com/projects/rust/book/getting-started/toolchain.html). Ejecuta el script una vez en la computadora de desarrollo; instala las herramientas en el perfil de usuario con Cargo y descarga las crates declaradas en `Cargo.toml`:
@@ -49,6 +55,10 @@ Para este chip Xtensa se requiere el compilador de Espressif, instalado por `esp
 ```
 
 El script genera el archivo de entorno como `rust/export-esp.sh`, lo ignora en Git y lo carga automáticamente al compilar. En otras terminales puedes cargarlo manualmente con `. ./export-esp.sh` desde `rust/`.
+
+## Actualizar dependencias
+
+Desde `rust/`, ejecuta `./scripts/update-deps.sh` para actualizar las crates permitidas por `Cargo.toml` y descargar las versiones resueltas. El script actualiza `Cargo.lock`; revisa ese diff y compila después con `./scripts/build.sh`. Las versiones de componentes ESP-IDF se resuelven aparte desde `components/tflm_demo/idf_component.yml` y se fijan en `components_esp32.lock`.
 
 ## Compilar sin placa y cargar cuando esté disponible
 

@@ -14,6 +14,7 @@
 
 mod display;
 mod gps;
+mod ml_demo;
 mod monitor_state;
 mod network;
 mod weather;
@@ -132,6 +133,10 @@ fn main() -> anyhow::Result<()> {
 
     // ── Red (Wi-Fi + HTTP + Weather) ──────────────────────────────────────
     network::start_network(state.clone())?;
+    let ml_ready = ml_demo::init();
+    if !ml_ready {
+        log::warn!("TensorFlow Lite Micro demo is unavailable");
+    }
 
     // ── Contadores de tiempo ──────────────────────────────────────────────
     let mut dht_last_ms: u64 = 0;
@@ -203,6 +208,22 @@ fn main() -> anyhow::Result<()> {
                 temperature.is_some() && humidity.is_some(),
                 t,
             );
+
+            if ml_ready {
+                if let (Some(temperature_c), Some(humidity_percent)) = (temperature, humidity) {
+                    // The published demo model expects one float in [0, 2π] per inference.
+                    ml_demo::log_prediction(
+                        "DHT22 temperature",
+                        (temperature_c + 40.0) / 120.0,
+                    );
+                    ml_demo::log_prediction(
+                        "DHT22 humidity",
+                        humidity_percent / 100.0,
+                    );
+                } else {
+                    ml_demo::log_prediction("battery voltage", battery_voltage / 5.0);
+                }
+            }
 
             log::info!(
                 "Bat {:.2}V | T {:?}C | H {:?}% | GPS {} | ciclo {}s",

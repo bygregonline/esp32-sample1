@@ -46,7 +46,7 @@ This project was generated 100% by artificial intelligence to test mixed capabil
 
 A multi-implementation ESP32 telemetry project for DHT22 temperature/humidity, NEO-6M GPS, battery voltage, a 170×320 color LCD, and a 128×64 OLED. The C, MicroPython, and Rust versions include a web API, Wi-Fi setup, and Open-Meteo forecasts. The Arduino version currently reads the sensors and renders the displays.
 
-The three full-featured versions share an API contract; C / ESP-IDF is the reference implementation. Arduino currently covers the sensor and display path:
+The three full-featured versions share an API contract; C / ESP-IDF is the reference implementation. C and Rust use TensorFlow Lite Micro (TFLM) to exercise float32 inference on the classic ESP32 CPU and its FPU with the same published `hello_world` sine model. The ESP32 has an FPU, not a TPU; this is an inference integration check, not a TPU test, performance benchmark, or sensor forecast. Normalized DHT22 temperature and humidity are passed in separate inferences (or battery voltage when DHT22 is unavailable), and the outputs are logged. The standard MicroPython firmware does not include TFLM; its README documents the custom firmware needed to add it. Arduino currently covers the sensor and display path:
 
 | Directory | Stack | Web server | Weather |
 |-----------|-------|-----------|---------|
@@ -494,6 +494,14 @@ curl -X POST http://<IP>/api/config/interval \
 │   ├── generate_readme.py  render README and repository snapshot
 │   └── build_docs.sh       MkDocs + Python, C, and Rust API documentation
 │
+├── components/
+│   └── tflm_demo/         ← shared ESP-IDF float32 model and C ABI for C and Rust
+│       ├── ml_demo.cpp
+│       ├── include/ml_demo.h
+│       ├── hello_world_model_data.cc/h
+│       ├── idf_component.yml
+│       └── README.md
+│
 ├── c/                   ← C / ESP-IDF 5.x (source of truth)
 │   ├── main/
 │   │   ├── main.c           main loop, DHT22 bit-bang, ADC
@@ -528,14 +536,18 @@ curl -X POST http://<IP>/api/config/interval \
 │   │   ├── display.rs       LCD + OLED render, same layout as C
 │   │   ├── network.rs       Wi-Fi AP+STA, NVS, HTTP server, all endpoints
 │   │   ├── weather.rs       Open-Meteo HTTPS fetch thread
-│   │   └── gps.rs           NMEA parser (RMC + GGA)
+│   │   ├── gps.rs           NMEA parser (RMC + GGA)
+│   │   └── ml_demo.rs       FFI calls to the shared TFLM component
 │   ├── .cargo/config.toml   target: xtensa-esp32-espidf (std)
 │   ├── build.rs             embuild ESP-IDF bindings
 │   ├── Cargo.toml           esp-idf-svc, mipidsi, ssd1306, embedded-graphics
+│   ├── Cargo.lock           locked Rust crate versions
+│   ├── components_esp32.lock  locked ESP-IDF component versions
 │   ├── rust-toolchain.toml  channel = "esp" (espup)
 │   └── scripts/
 │       ├── install-deps.sh  install espup, espflash
 │       ├── build.sh         cargo build --release → firmware.bin
+│       ├── update-deps.sh   cargo update + cargo fetch
 │       └── deploy.sh        build + espflash + monitor
 │
 └── arduino/             ← Arduino (display + sensors only, no web server)
@@ -593,6 +605,8 @@ cd c/
 # Compile — no board needed
 ./scripts/build.sh
 # → build/esp32_monitor_c.bin
+# The first build resolves esp-tflite-micro and esp-nn through ESP-IDF Component Manager.
+# The float32 Hello World inference demo is described in c/README.md.
 
 # Flash + open serial monitor (board must be connected)
 ./scripts/deploy.sh
@@ -650,6 +664,9 @@ cd rust/
 
 # Activate the Xtensa toolchain environment
 . ./export-esp.sh
+
+# Optional: update Cargo.lock and download the resolved crates
+./scripts/update-deps.sh
 
 # Compile — no board needed
 ./scripts/build.sh

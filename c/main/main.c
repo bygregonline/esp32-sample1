@@ -17,6 +17,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "gps.h"
+#include "ml_demo.h"
 #include "monitor_state.h"
 #include "network.h"
 
@@ -131,6 +132,18 @@ static float read_battery_voltage(adc_oneshot_unit_handle_t adc, adc_cali_handle
     return adc_volts * ADC_EXTERNAL_DIVIDER_RATIO * VOLTAGE_SENSOR_RATIO * VOLTAGE_CALIBRATION;
 }
 
+static void log_tflm_prediction(const char *input_source, float input_fraction) {
+    if (input_fraction < 0.0f) input_fraction = 0.0f;
+    if (input_fraction > 1.0f) input_fraction = 1.0f;
+
+    const float model_input = input_fraction * 6.28318530718f;
+    float prediction = 0.0f;
+    if (ml_demo_infer(model_input, &prediction)) {
+        ESP_LOGI(TAG, "TFLM demo | input: %s -> %.3f rad | predicted sin(x): %.3f",
+                 input_source, model_input, prediction);
+    }
+}
+
 /* ── GPS UART ───────────────────────────────────────────────────────────── */
 
 #ifndef CONFIG_MONITOR_WOKWI_SIMULATION
@@ -181,6 +194,10 @@ void app_main(void) {
     adc_cali_handle_t adc_calibration = NULL;
     ESP_ERROR_CHECK(configure_adc(&adc, &adc_calibration));
     ESP_ERROR_CHECK(network_start(&state));
+    const bool ml_ready = ml_demo_init();
+    if (!ml_ready) {
+        ESP_LOGW(TAG, "TensorFlow Lite Micro demo is unavailable");
+    }
 
     dht_reading_t dht    = {0};
     bool dht_ok          = false;
@@ -238,6 +255,21 @@ void app_main(void) {
             const float battery_voltage = read_battery_voltage(adc, adc_calibration);
             monitor_state_set_sensors(&state, battery_voltage, dht.temperature, dht.humidity,
                                       dht_ok, now_ms);
+
+            if (ml_ready) {
+                if (dht_ok) {
+                    /* The published demo model was trained on the range [0, 2π]. */
+                    float temperature_fraction = (dht.temperature + 40.0f) / 120.0f;
+                    log_tflm_prediction("DHT22 temperature", temperature_fraction);
+
+                    const float humidity_fraction = dht.humidity / 100.0f;
+                    log_tflm_prediction("DHT22 humidity", humidity_fraction);
+                } else {
+                    /* Use the ADC reading as a fallback when DHT22 is unavailable. */
+                    const float battery_fraction = battery_voltage / 5.0f;
+                    log_tflm_prediction("battery voltage", battery_fraction);
+                }
+            }
         }
 
         monitor_state_set_gps(&state, &gps, now_ms);

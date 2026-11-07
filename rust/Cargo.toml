@@ -33,6 +33,15 @@ anyhow = { version = "=1.0", default-features = false }
 [build-dependencies]
 embuild = "=0.33.7"
 
+# Reuse the same native ESP-IDF TensorFlow Lite Micro component and model as C.
+[package.metadata.esp-idf-sys]
+extra_components = [
+    {
+        component_dirs = ["../components/tflm_demo"],
+        bindings_header = "../components/tflm_demo/include/ml_demo.h",
+    },
+]
+
 # ── Profiles ──────────────────────────────────────────────────────────────
 [profile.release]
 codegen-units = 1

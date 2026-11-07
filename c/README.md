@@ -29,8 +29,17 @@ El montaje coloca el ESP32 al centro, las pantallas a la izquierda y los sensore
 - Servidor web local con panel HTML y endpoints JSON para sensores, GPS, Wi-Fi y clima.
 - Pronóstico de Open-Meteo basado en la ubicación reciente del GPS. Se consulta cada cinco minutos si hay Wi-Fi, señal GPS e internet.
 - Pronóstico en ambas pantallas y cuenta regresiva de actualización; la LCD a color muestra un anillo que se reduce con el tiempo.
+- Ejemplo de inferencia TensorFlow Lite Micro `float32` basado en el modelo público Hello World.
 
 Los pines y factores están en [`main/config.h`](main/config.h). Para el voltaje usa el divisor documentado en el README raíz: resistencia de 12 kΩ entre salida `S` del módulo y GPIO34, y resistencia de 10 kΩ entre GPIO34 y GND. Calibra `VOLTAGE_CALIBRATION` comparando con un multímetro.
+
+## TensorFlow Lite Micro: prueba float32
+
+El firmware incluye el modelo de demostración [Hello World de TensorFlow Lite Micro](https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/hello_world), que aproxima `sin(x)`. Usamos TFLM para ejercitar inferencia `float32` en el CPU/FPU del ESP32 clásico. Este chip tiene FPU, no TPU: la prueba valida la integración del runtime, pero no es una prueba de TPU, un benchmark de rendimiento, un pronóstico meteorológico ni una clasificación de sensores.
+
+Cada vez que se actualizan las lecturas, el firmware normaliza la temperatura y la humedad del DHT22 al rango esperado y las entrega al modelo en dos inferencias separadas, porque el modelo recibe un solo valor por vez. Si el DHT22 no está disponible, normaliza el voltaje de batería como entrada de respaldo. Las predicciones se registran en el monitor serial con la etiqueta `TFLM demo`; no modifican las pantallas ni los valores que entrega la API.
+
+La dependencia `espressif/esp-tflite-micro` está fijada en [`components/tflm_demo/idf_component.yml`](../components/tflm_demo/idf_component.yml), y el modelo y su interfaz compartida están en [`components/tflm_demo/`](../components/tflm_demo/). C y Rust enlazan el mismo componente; el intérprete está implementado en C++ y se llama desde ambas versiones mediante una interfaz C.
 
 ## Documentación
 
