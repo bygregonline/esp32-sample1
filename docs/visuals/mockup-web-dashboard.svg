@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1000" viewBox="0 0 1440 1000" role="img" aria-labelledby="title desc">
+  <title id="title">ESP32 Monitor web dashboard preview</title>
+  <desc id="desc">Dark responsive telemetry dashboard with a small upper-right refresh countdown ring, sensor cards, a changing moon image, weather summary, and system log.</desc>
+  <defs>
+    <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#11243b"/><stop offset=".38" stop-color="#0b1320"/><stop offset="1" stop-color="#080c13"/></linearGradient>
+    <linearGradient id="panel" x2="1" y2="1"><stop stop-color="#142337"/><stop offset="1" stop-color="#0e1724"/></linearGradient>
+    <radialGradient id="moon" cx="35%" cy="30%"><stop stop-color="#f2f5eb"/><stop offset=".65" stop-color="#b6c0c0"/><stop offset="1" stop-color="#617180"/></radialGradient>
+    <linearGradient id="shadow" x2="1"><stop stop-color="#080d14"/><stop offset=".5" stop-color="#121923"/><stop offset="1" stop-color="#15202e"/></linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>
+    <clipPath id="moonClip"><circle cx="974" cy="456" r="48"/></clipPath>
+  </defs>
+  <rect width="1440" height="1000" fill="url(#bg)"/>
+  <circle cx="1140" cy="110" r="240" fill="#24517d" opacity=".12" filter="url(#glow)"/>
+  <!-- compact fixed refresh indicator, anchored at the upper right -->
+  <rect x="1360" y="22" width="58" height="58" rx="17" fill="#101a29" stroke="#29415d"/>
+  <circle cx="1389" cy="51" r="19" fill="none" stroke="#263c55" stroke-width="4"/>
+  <circle cx="1389" cy="51" r="19" fill="none" stroke="#54d6c7" stroke-width="4" stroke-linecap="round" stroke-dasharray="78 120" transform="rotate(-90 1389 51)"/>
+  <text x="1389" y="55" text-anchor="middle" fill="#ecf5ff" font-family="Arial,sans-serif" font-size="10" font-weight="700">00:08</text>
+  <!-- page heading -->
+  <text x="106" y="45" fill="#78b8ff" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="3">LIVE SENSOR STATION</text>
+  <text x="106" y="78" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="31" font-weight="700">ESP32 Monitor</text>
+  <text x="1338" y="61" text-anchor="end" fill="#67e2b3" font-family="Arial,sans-serif" font-size="13">●  ONLINE</text>
+
+  <!-- connection status -->
+  <rect x="34" y="112" width="1372" height="100" rx="17" fill="url(#panel)" stroke="#25364b"/>
+  <text x="60" y="145" fill="#8294aa" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">LOCAL TIME</text>
+  <text x="60" y="181" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="25" font-weight="700">10:42:16 AM</text>
+  <line x1="386" y1="134" x2="386" y2="190" stroke="#26364a"/>
+  <text x="420" y="145" fill="#8294aa" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">NETWORK</text>
+  <text x="420" y="181" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="21" font-weight="700">Wi-Fi connected</text>
+  <line x1="760" y1="134" x2="760" y2="190" stroke="#26364a"/>
+  <text x="794" y="145" fill="#8294aa" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">DEVICE IP</text>
+  <text x="794" y="181" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="22" font-weight="700">192.168.1.42</text>
+  <text x="1348" y="169" text-anchor="end" fill="#8496aa" font-family="Arial,sans-serif" font-size="13">Updated just now</text>
+
+  <!-- sensor grid -->
+  <text x="42" y="255" fill="#8fbfff" font-family="Arial,sans-serif" font-size="16" font-weight="700">Live readings</text>
+  <g font-family="Arial,sans-serif">
+    <g><rect x="34" y="274" width="328" height="112" rx="15" fill="#0b1420" stroke="#1e3043"/><text x="58" y="308" fill="#8798ad" font-size="12" font-weight="700" letter-spacing="1">BATTERY</text><text x="58" y="354" fill="#eaf2ff" font-size="30" font-weight="700">3.91 <tspan fill="#95a6bb" font-size="17">V</tspan></text><circle cx="329" cy="306" r="6" fill="#54d6c7"/></g>
+    <g><rect x="382" y="274" width="328" height="112" rx="15" fill="#0b1420" stroke="#1e3043"/><text x="406" y="308" fill="#8798ad" font-size="12" font-weight="700" letter-spacing="1">TEMPERATURE</text><text x="406" y="354" fill="#eaf2ff" font-size="30" font-weight="700">24.8 <tspan fill="#95a6bb" font-size="17">°C</tspan></text><circle cx="677" cy="306" r="6" fill="#54d6c7"/></g>
+    <g><rect x="730" y="274" width="328" height="112" rx="15" fill="#0b1420" stroke="#1e3043"/><text x="754" y="308" fill="#8798ad" font-size="12" font-weight="700" letter-spacing="1">HUMIDITY</text><text x="754" y="354" fill="#eaf2ff" font-size="30" font-weight="700">48 <tspan fill="#95a6bb" font-size="17">%</tspan></text><circle cx="1025" cy="306" r="6" fill="#54d6c7"/></g>
+    <g><rect x="1078" y="274" width="328" height="112" rx="15" fill="#0b1420" stroke="#1e3043"/><text x="1102" y="308" fill="#8798ad" font-size="12" font-weight="700" letter-spacing="1">AIR PRESSURE</text><text x="1102" y="354" fill="#eaf2ff" font-size="30" font-weight="700">1013.2 <tspan fill="#95a6bb" font-size="16">hPa</tspan></text><circle cx="1373" cy="306" r="6" fill="#54d6c7"/></g>
+  </g>
+
+  <!-- forecast, lunar image, coordinates -->
+  <rect x="34" y="414" width="650" height="190" rx="17" fill="url(#panel)" stroke="#25364b"/>
+  <text x="60" y="450" fill="#8fbfff" font-family="Arial,sans-serif" font-size="16" font-weight="700">Weather forecast</text>
+  <text x="60" y="493" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="27" font-weight="700">Partly cloudy</text>
+  <text x="60" y="524" fill="#a9b8ca" font-family="Arial,sans-serif" font-size="15">Now 24°C  ·  High 27° / Low 18°</text>
+  <text x="60" y="565" fill="#54d6c7" font-family="Arial,sans-serif" font-size="14">Rain chance 10%</text>
+  <g transform="translate(492 478)"><circle r="25" fill="#f7c96a"/><path d="M7-23a25 25 0 1 0 0 46A21 25 0 0 1 7-23" fill="#d99f48" opacity=".62"/></g>
+  <text x="520" y="484" fill="#98aac0" font-family="Arial,sans-serif" font-size="12">CURRENT CONDITIONS</text>
+
+  <rect x="704" y="414" width="342" height="190" rx="17" fill="url(#panel)" stroke="#25364b"/>
+  <text x="730" y="450" fill="#8fbfff" font-family="Arial,sans-serif" font-size="16" font-weight="700">Moon phase</text>
+  <circle cx="974" cy="456" r="62" fill="#9ac9ed" opacity=".13" filter="url(#glow)"/>
+  <g clip-path="url(#moonClip)"><circle cx="974" cy="456" r="48" fill="url(#moon)"/><ellipse cx="956" cy="456" rx="24" ry="48" fill="url(#shadow)"/><circle cx="958" cy="436" r="7" fill="#7f8a91" opacity=".45"/><circle cx="984" cy="462" r="10" fill="#7b8790" opacity=".28"/><circle cx="965" cy="480" r="5" fill="#596875" opacity=".35"/><circle cx="997" cy="434" r="4" fill="#7f8a91" opacity=".34"/></g>
+  <text x="730" y="536" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="17" font-weight="700">Waxing gibbous</text>
+  <text x="730" y="561" fill="#a9b8ca" font-family="Arial,sans-serif" font-size="14">Illumination 72%</text>
+  <text x="730" y="583" fill="#71849c" font-family="Arial,sans-serif" font-size="11">Phase image follows live data</text>
+
+  <rect x="1066" y="414" width="340" height="190" rx="17" fill="url(#panel)" stroke="#25364b"/>
+  <text x="1092" y="450" fill="#8fbfff" font-family="Arial,sans-serif" font-size="16" font-weight="700">GPS position</text>
+  <text x="1092" y="493" fill="#8798ad" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1">LATITUDE</text>
+  <text x="1092" y="520" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="19" font-weight="700">19.43261</text>
+  <text x="1092" y="554" fill="#8798ad" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="1">LONGITUDE</text>
+  <text x="1092" y="581" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="19" font-weight="700">-99.13321</text>
+
+  <!-- refresh state and event logger -->
+  <rect x="34" y="626" width="650" height="138" rx="17" fill="url(#panel)" stroke="#25364b"/>
+  <text x="60" y="663" fill="#8fbfff" font-family="Arial,sans-serif" font-size="16" font-weight="700">Refresh cycle</text>
+  <text x="60" y="711" fill="#f1f6ff" font-family="Arial,sans-serif" font-size="27" font-weight="700">10 seconds</text>
+  <text x="60" y="739" fill="#8a9db4" font-family="Arial,sans-serif" font-size="13">Sensor update cadence</text>
+  <text x="630" y="714" text-anchor="end" fill="#54d6c7" font-family="Arial,sans-serif" font-size="14">Next update in 00:08</text>
+  <rect x="34" y="786" width="1372" height="178" rx="17" fill="url(#panel)" stroke="#25364b"/>
+  <text x="60" y="824" fill="#8fbfff" font-family="Arial,sans-serif" font-size="16" font-weight="700">System log</text>
+  <circle cx="66" cy="855" r="4" fill="#54d6c7"/><text x="82" y="860" fill="#a9b8ca" font-family="ui-monospace,monospace" font-size="13">10:42:11  Weather forecast updated from Open-Meteo</text>
+  <circle cx="66" cy="885" r="4" fill="#54d6c7"/><text x="82" y="890" fill="#a9b8ca" font-family="ui-monospace,monospace" font-size="13">10:42:09  GPS fix acquired · 8 satellites</text>
+  <circle cx="66" cy="915" r="4" fill="#54d6c7"/><text x="82" y="920" fill="#a9b8ca" font-family="ui-monospace,monospace" font-size="13">10:42:03  BMP280 pressure sensor ready</text>
+</svg>

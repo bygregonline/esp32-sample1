@@ -31,7 +31,7 @@ fn fetch_weather(lat: f64, lon: f64) -> anyhow::Result<WeatherData> {
         "https://api.open-meteo.com/v1/forecast\
          ?latitude={:.6}&longitude={:.6}\
          &current=temperature_2m,relative_humidity_2m,weather_code\
-         &daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max\
+         &daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max,moon_phase\
          &forecast_days=1&timezone=auto",
         lat, lon
     );
@@ -78,6 +78,9 @@ fn parse_weather_response(body: &[u8]) -> anyhow::Result<WeatherData> {
     let min_temp = json_array_first_f64(text, "\"temperature_2m_min\"")?;
     let max_temp = json_array_first_f64(text, "\"temperature_2m_max\"")?;
     let precip = json_array_first_f64(text, "\"precipitation_probability_max\"")?;
+    let moon_phase_result = json_array_first_f64(text, "\"moon_phase\"");
+    let moon_phase_valid = moon_phase_result.is_ok();
+    let moon_phase = moon_phase_result.unwrap_or(0.0);
 
     let code = weather_code as i32;
     Ok(WeatherData {
@@ -88,6 +91,10 @@ fn parse_weather_response(body: &[u8]) -> anyhow::Result<WeatherData> {
         minimum_temperature_c: min_temp as f32,
         maximum_temperature_c: max_temp as f32,
         precipitation_probability: precip as i32,
+        moon_phase: moon_phase as f32,
+        moon_illumination_percent: ((1.0 - (moon_phase * core::f64::consts::TAU).cos()) * 50.0)
+            .round() as i32,
+        moon_phase_valid,
         updated_ms: esp_idf_svc::systime::EspSystemTime {}.now().as_millis() as u64,
         summary: weather_summary(code).to_string(),
     })

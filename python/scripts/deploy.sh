@@ -18,5 +18,5 @@ fi
 
 "$SCRIPT_DIR/build.sh"
 cd "$OUTPUT_DIR"
-"$MPREMOTE" connect "$CONNECTION" fs cp config.py gps.py ssd1306.py st7789.py main.py :
+"$MPREMOTE" connect "$CONNECTION" fs cp config.py gps.py bmp280.py ssd1306.py st7789.py moon_image.py main.py :
 "$MPREMOTE" connect "$CONNECTION" reset

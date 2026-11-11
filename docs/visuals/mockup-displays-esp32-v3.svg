@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="850" viewBox="0 0 1440 850" role="img" aria-labelledby="title desc">
+  <title id="title">ESP32 monitor display mockup</title>
+  <desc id="desc">Color LCD with date, IP, sensor values, GPS coordinates, weather, pressure, a rendered moon-phase icon, countdown ring and event log, alongside a compact OLED.</desc>
+  <defs>
+    <linearGradient id="lcd" x2="0" y2="1"><stop stop-color="#090e16"/><stop offset="1" stop-color="#020407"/></linearGradient>
+    <linearGradient id="case" x2="0" y2="1"><stop stop-color="#1974bd"/><stop offset="1" stop-color="#064575"/></linearGradient>
+    <radialGradient id="moon" cx="35%" cy="30%"><stop stop-color="#f5f5e9"/><stop offset=".7" stop-color="#bac1c2"/><stop offset="1" stop-color="#73818e"/></radialGradient>
+    <linearGradient id="moonShadow" x2="1"><stop stop-color="#03070d"/><stop offset="1" stop-color="#182331"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#071525" flood-opacity=".24"/></filter>
+    <clipPath id="moonClip"><circle cx="650" cy="515" r="16"/></clipPath>
+  </defs>
+  <rect width="1440" height="850" fill="#f4f7fb"/>
+  <text x="720" y="62" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="32" font-weight="700" fill="#10233d">ESP32 TELEMETRY · DISPLAY PREVIEW</text>
+  <g filter="url(#shadow)">
+    <rect x="80" y="105" width="640" height="660" rx="32" fill="url(#case)" stroke="#04375e" stroke-width="5"/>
+    <rect x="105" y="130" width="590" height="610" rx="16" fill="url(#lcd)" stroke="#111923" stroke-width="8"/>
+    <rect x="750" y="260" width="610" height="370" rx="30" fill="url(#case)" stroke="#04375e" stroke-width="5"/>
+    <rect x="775" y="285" width="560" height="320" rx="13" fill="#020407" stroke="#111923" stroke-width="8"/>
+  </g>
+  <g fill="#e4bd76" stroke="#fff0c6" stroke-width="5"><circle cx="111" cy="136" r="12"/><circle cx="689" cy="136" r="12"/><circle cx="111" cy="735" r="12"/><circle cx="689" cy="735" r="12"/><circle cx="781" cy="291" r="11"/><circle cx="1329" cy="291" r="11"/><circle cx="781" cy="599" r="11"/><circle cx="1329" cy="599" r="11"/></g>
+  <g font-family="Menlo,Consolas,monospace" font-weight="600" font-size="20">
+    <text x="132" y="166" fill="#7cc7ff">TUE 10 NOV 13:54</text>
+    <text x="132" y="198" fill="#51e08b">IP 192.168.1.42</text>
+    <circle cx="640" cy="176" r="30" fill="none" stroke="#485463" stroke-width="8"/>
+    <circle cx="640" cy="176" r="30" fill="none" stroke="#32d583" stroke-width="8" stroke-dasharray="134 188" stroke-linecap="round" transform="rotate(-90 640 176)"/>
+    <text x="640" y="182" text-anchor="middle" fill="#fff" font-size="15">00:07</text>
+    <path d="M130 212H670" stroke="#526071"/>
+    <text x="132" y="244" fill="#5ee7ed">BAT 12.46V</text><text x="385" y="244" fill="#fff">TEMP 24.5C</text>
+    <text x="132" y="275" fill="#5ee7ed">HUM 48%</text>
+    <path d="M130 289H670" stroke="#526071"/>
+    <text x="132" y="322" fill="#64e79a">GPS FIX</text>
+    <text x="132" y="352" fill="#fff">LAT 19.43260</text><text x="132" y="382" fill="#fff">LON -99.13320</text>
+    <path d="M130 396H670" stroke="#526071"/>
+    <text x="132" y="428" fill="#5ee7ed">WEATHER · SUNNY 22.5C</text>
+    <text x="132" y="458" fill="#fff">MIN 15.0  MAX 28.0C · RAIN 5%</text>
+    <text x="132" y="489" fill="#7cc7ff">PRESS 1013.2 hPa</text>
+    <text x="132" y="520" fill="#ffc76a">MOON · WAX GIB · 72%</text>
+    <g clip-path="url(#moonClip)"><circle cx="650" cy="515" r="16" fill="url(#moon)"/><ellipse cx="644" cy="515" rx="8" ry="16" fill="url(#moonShadow)"/><circle cx="652" cy="509" r="2.4" fill="#77838c" opacity=".55"/><circle cx="656" cy="518" r="3" fill="#77838c" opacity=".4"/><circle cx="648" cy="522" r="1.6" fill="#677580" opacity=".5"/></g>
+    <path d="M130 534H670" stroke="#526071"/>
+    <text x="132" y="566" fill="#5ee7ed">UPDATE 10s</text>
+    <text x="132" y="616" fill="#5ee7ed" font-size="16">SYSTEM LOG</text>
+    <text x="132" y="642" fill="#d3dfec" font-size="15">13:53 Wi-Fi connected</text>
+    <text x="132" y="665" fill="#d3dfec" font-size="15">13:54 BMP280 pressure OK</text>
+    <text x="132" y="688" fill="#d3dfec" font-size="15">13:54 Weather updated</text>
+  </g>
+  <g font-family="Menlo,Consolas,monospace" font-size="21" font-weight="600" fill="#f4f7fb">
+    <text x="808" y="333">TUE 10 NOV 13:54</text>
+    <text x="808" y="369">IP 192.168.1.42</text>
+    <text x="808" y="405">T24 H48 BAT12.5</text>
+    <text x="808" y="441">P 1013.2 hPa</text>
+    <text x="808" y="477">LAT 19.4326</text>
+    <text x="808" y="513">LON -99.1332</text>
+    <text x="808" y="549">WX SUNNY 22C RAIN5%</text>
+    <text x="808" y="585">UPD 10s 00:07</text>
+  </g>
+  <text x="400" y="810" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="700" fill="#10233d">ST7789V2 · COLOR LCD · 170 × 320</text>
+  <text x="1055" y="680" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="20" font-weight="700" fill="#10233d">SSD1306 · OLED · 128 × 64</text>
+  <text x="720" y="842" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="14" fill="#526071">Illustrative readings; actual values depend on the sensors, location, and network sync.</text>
+</svg>

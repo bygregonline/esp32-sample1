@@ -12,7 +12,7 @@ command -v cargo >/dev/null 2>&1 || {
 if ! command -v espup >/dev/null 2>&1; then
     cargo install espup --locked
 fi
-espup install --targets esp32 --export-file "$PROJECT_DIR/export-esp.sh"
+espup install --targets esp32s3 --export-file "$PROJECT_DIR/export-esp.sh"
 
 if ! command -v espflash >/dev/null 2>&1; then
     cargo install espflash --locked
@@ -25,6 +25,7 @@ fi
 if [ -f "$PROJECT_DIR/export-esp.sh" ]; then
     . "$PROJECT_DIR/export-esp.sh"
 fi
+. "$PROJECT_DIR/scripts/activate-esp-idf.sh"
 cargo fetch --manifest-path "$PROJECT_DIR/Cargo.toml"
 echo "Toolchain Xtensa, espflash, ldproxy y crates Rust preparados."
 echo "En terminales nuevas, ejecuta: . \"$PROJECT_DIR/export-esp.sh\""

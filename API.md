@@ -1,10 +1,14 @@
 # ESP32 Monitor — API Reference
 
 Guía completa de endpoints HTTP disponibles en las implementaciones
-**C/ESP-IDF** y **Python/MicroPython** del monitor.
+**C/ESP-IDF**, **Python/MicroPython** y **Rust/ESP-IDF** del monitor.
 La implementación **Rust/ESP-IDF** expone exactamente los mismos endpoints.
 
 Reemplaza `<IP>` con la dirección IP del dispositivo.
+
+La página en `/` actualiza estas lecturas cada dos segundos. La interfaz BLE
+GATT también ofrece snapshots en JSON, texto, YAML y XML; consulta
+[docs/ble.md](docs/ble.md) para los UUID y el contrato de datos.
 
 - En red local: la que muestra el display (ej. `192.168.1.42`)
 - Desde el AP de configuración: `192.168.4.1`
@@ -16,6 +20,7 @@ Reemplaza `<IP>` con la dirección IP del dispositivo.
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | GET | `/` | Página HTML de configuración |
+| GET | `/moon.bmp` | Imagen BMP de la fase lunar actual |
 | GET | `/api/status` | Snapshot completo del monitor |
 | GET | `/api/sensors` | Última lectura de sensores |
 | GET | `/api/weather` | Solo datos de clima |
@@ -42,6 +47,10 @@ curl http://<IP>/api/status
     "temperature_c": 24.1,
     "humidity_percent": 55.0,
     "dht_valid": true,
+    "pressure_hpa": 1013.2,
+    "bmp280_valid": true,
+    "moon_phase": 0.25,
+    "moon_illumination_percent": 50,
     "last_read_ms": 45000
   },
   "gps": {
@@ -60,7 +69,9 @@ curl http://<IP>/api/status
     "weather_interval_seconds": 300,
     "remaining_seconds": 7
   },
-  "display_mask": 15,
+  "display_mask": 63,
+  "events": ["Setup AP ready", "BMP280 pressure updated"],
+  "local_time": "Tue 10 Nov 13:54",
   "weather": {
     "available": true,
     "summary": "SOLEADO",
@@ -70,6 +81,8 @@ curl http://<IP>/api/status
     "minimum_temperature_c": 15.0,
     "maximum_temperature_c": 28.0,
     "precipitation_probability": 5,
+    "moon_phase": 0.25,
+    "moon_illumination_percent": 50,
     "age_seconds": 120,
     "stale": false
   }
@@ -94,13 +107,18 @@ curl http://<IP>/api/sensors
   "temperature_c": 24.1,
   "humidity_percent": 55.0,
   "dht_valid": true,
+  "pressure_hpa": 1013.2,
+  "bmp280_valid": true,
+  "moon_phase": 0.25,
+  "moon_illumination_percent": 50,
   "gps_fix": true,
   "latitude": 19.4326,
   "longitude": -99.1332,
   "satellites": 9,
   "last_read_ms": 45000,
   "interval_seconds": 10,
-  "remaining_seconds": 7
+  "remaining_seconds": 7,
+  "local_time": "Tue 10 Nov 13:54"
 }
 ```
 
@@ -126,6 +144,8 @@ curl http://<IP>/api/weather
   "minimum_temperature_c": 14.0,
   "maximum_temperature_c": 21.0,
   "precipitation_probability": 80,
+  "moon_phase": 0.75,
+  "moon_illumination_percent": 50,
   "age_seconds": 45,
   "stale": false
 }
@@ -221,7 +241,7 @@ curl -X POST http://<IP>/api/config/display \
 ```bash
 curl -X POST http://<IP>/api/config/display \
      -H "Content-Type: application/json" \
-     -d '{"battery": true, "dht": true, "gps": false, "weather": false}'
+     -d '{"battery": true, "dht": true, "gps": false, "weather": false, "pressure": false, "moon": false}'
 ```
 
 ### Solo GPS (modo navegación)
@@ -229,7 +249,7 @@ curl -X POST http://<IP>/api/config/display \
 ```bash
 curl -X POST http://<IP>/api/config/display \
      -H "Content-Type: application/json" \
-     -d '{"battery": false, "dht": false, "gps": true, "weather": false}'
+     -d '{"battery": false, "dht": false, "gps": true, "weather": false, "pressure": false, "moon": false}'
 ```
 
 ### Ocultar todo (display en blanco excepto Wi-Fi y UPDATE)
@@ -237,7 +257,7 @@ curl -X POST http://<IP>/api/config/display \
 ```bash
 curl -X POST http://<IP>/api/config/display \
      -H "Content-Type: application/json" \
-     -d '{"battery": false, "dht": false, "gps": false, "weather": false}'
+     -d '{"battery": false, "dht": false, "gps": false, "weather": false, "pressure": false, "moon": false}'
 ```
 
 **Respuesta:**
@@ -249,13 +269,15 @@ curl -X POST http://<IP>/api/config/display \
   "battery": true,
   "dht": true,
   "gps": false,
-  "weather": false
+  "weather": false,
+  "pressure": false,
+  "moon": false
 }
 ```
 
 > `display_mask` es el bitmask resultante:
-> bit 0 = batería, bit 1 = DHT22, bit 2 = GPS, bit 3 = clima.
-> `0x0F` (15) = todo visible. `0x00` = todo oculto.
+> bit 0 = batería, bit 1 = DHT22, bit 2 = GPS, bit 3 = clima, bit 4 = presión, bit 5 = fase lunar.
+> `0x3F` (63) = todo visible. `0x00` = todo oculto.
 
 ---
 

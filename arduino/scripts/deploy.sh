@@ -6,7 +6,7 @@ PROJECT_DIR=$(CDPATH='' cd -- "$SCRIPT_DIR/.." && pwd)
 SKETCH_DIR="$PROJECT_DIR/esp32_monitor"
 BUILD_DIR="$PROJECT_DIR/build"
 OUTPUT_DIR="$PROJECT_DIR/dist"
-ARDUINO_FQBN=${ARDUINO_FQBN:-esp32:esp32:esp32}
+ARDUINO_FQBN=${ARDUINO_FQBN:-esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi}
 
 command -v arduino-cli >/dev/null 2>&1 || {
     echo "No se encontró arduino-cli. Instálalo y ejecuta ./scripts/install-deps.sh." >&2

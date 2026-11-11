@@ -1,6 +1,6 @@
 # Monitor ESP32 para Arduino IDE
 
-Implementación para ESP32 DevKit/WROOM-32 clásico con LCD Waveshare ST7789V2 de 170 × 320, OLED SSD1306 de 128 × 64, sensor DHT22, GPS NEO-6M y lectura analógica de batería.
+Implementación para placa ESP32-S3 N16R8 de doble USB-C (16 MB flash, 8 MB PSRAM), con GPIO basados en la referencia ESP32-S3-DevKitC-1. Verifica el rotulado de la placa concreta antes de cablear. Incluye LCD Waveshare ST7789V2 de 170 × 320, OLED SSD1306 de 128 × 64, sensor DHT22, GPS NEO-6M y lectura analógica de batería.
 
 ## Diagramas y pantallas
 
@@ -44,7 +44,7 @@ Los binarios quedan en `dist/`. Para compilar y subir cuando la placa esté cone
 ESP32_PORT=/dev/cu.usbserial-0001 ./scripts/deploy.sh
 ```
 
-En Linux el puerto suele ser `/dev/ttyUSB0`; en Windows, por ejemplo, `COM3`. Para otra placa, cambia el identificador con `ARDUINO_FQBN`; por defecto se usa `esp32:esp32:esp32` (ESP32 Dev Module). El índice de placas de Espressif se pasa en cada comando, sin cambiar la configuración global de Arduino CLI.
+En Linux el puerto suele ser `/dev/ttyUSB0`; en Windows, por ejemplo, `COM3`. Para otra placa, cambia el identificador con `ARDUINO_FQBN`; por defecto se usa `esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi` (ESP32-S3 N16R8). El índice de placas de Espressif se pasa en cada comando, sin cambiar la configuración global de Arduino CLI.
 
 ## Instalar en Arduino IDE
 
@@ -68,15 +68,15 @@ El LCD se maneja con Arduino_GFX y sus desplazamientos de 35 píxeles; la OLED u
 
 | Módulo | ESP32 |
 |---|---:|
-| LCD SPI SCK / MOSI | GPIO18 / GPIO23 |
-| LCD CS / DC / RST | GPIO13 / GPIO27 / GPIO26 |
+| LCD SPI SCK / MOSI | GPIO12 / GPIO11 |
+| LCD CS / DC / RST | GPIO10 / GPIO13 / GPIO14 |
 | LCD BL | 3V3 (luz fija) |
-| OLED I2C SDA / SCL | GPIO21 / GPIO22 |
-| DHT22 DATA | GPIO33 |
-| GPS TX al RX del ESP32 | GPIO16 |
+| OLED I2C SDA / SCL | GPIO8 / GPIO9 |
+| DHT22 DATA | GPIO6 |
+| GPS TX al RX del ESP32 | GPIO18 |
 | GPS RX desde TX del ESP32 (opcional) | GPIO17 |
-| Sensor de voltaje S | GPIO34 a través del divisor adicional |
+| Sensor de voltaje S | GPIO4 (ADC1_CH3) a través del divisor adicional |
 
-El GPS usa 9600 baudios y la OLED usa I2C `0x3C`. El DHT22 sin módulo requiere una resistencia pull-up de 4.7–10 kΩ entre DATA y 3V3. Para la entrada de batería, conecta una resistencia de 12 kΩ entre la salida `S` del módulo y GPIO34, y otra de 10 kΩ entre GPIO34 y GND. No conectes la salida del sensor ni la batería directamente al GPIO.
+El GPS usa 9600 baudios y la OLED usa I2C `0x3C`. El DHT22 sin módulo requiere una resistencia pull-up de 4.7–10 kΩ entre DATA y 3V3. Para la entrada de batería, conecta una resistencia de 12 kΩ entre la salida `S` del módulo y GPIO4, y otra de 10 kΩ entre GPIO4 y GND. No conectes la salida del sensor ni la batería directamente al GPIO.
 
 Los pines, desplazamientos y factores se pueden cambiar en `esp32_monitor/config.h`. Ajusta `VOLTAGE_CALIBRATION` comparando la lectura con un multímetro.

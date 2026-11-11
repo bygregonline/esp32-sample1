@@ -14,6 +14,8 @@
 
 {{section:HTTP API}}
 
+{{section:Bluetooth Low Energy}}
+
 {{section:curl examples}}
 
 {{section:Project structure}}

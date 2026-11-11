@@ -24,6 +24,7 @@ repos:
           (?x)^(
             uv\.lock|
             rust/Cargo\.lock|
+            rust/vendor/esp-idf-svc/\.cargo_vcs_info\.json|
             .*\.md
           )$
 
@@ -66,6 +67,7 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
+        exclude: ^rust/vendor/esp-idf-svc/.*\.rs$
       - id: check-yaml
         args: ["--allow-multiple-documents"]
       - id: check-toml

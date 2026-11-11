@@ -1,6 +1,6 @@
 # MicroPython
 
-The MicroPython version includes the display drivers and GPS parser in the repository. Host-side development tools are installed through `uv`; the board runs standard MicroPython modules.
+The MicroPython version targets a dual-USB-C ESP32-S3 N16R8 development board. GPIO assignments follow the ESP32-S3-DevKitC-1 reference; verify the printed pin labels on the purchased carrier board. It includes the display drivers, GPS parser, and BMP280 I²C driver in the repository. Its root page auto-refreshes from the HTTP API, and its BLE GATT peripheral makes the current snapshot readable as JSON, text, YAML, or XML. Host-side development tools are installed through `uv`; the board runs standard MicroPython modules. BMP280 uses I²C1 SDA GPIO1 and SCL GPIO2.
 
 ```sh
 cd python

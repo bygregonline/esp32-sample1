@@ -104,6 +104,7 @@ static bool parse_weather_response(const weather_http_response_t *response,
     double minimum;
     double maximum;
     double precipitation;
+    double moon_phase = 0;
     const bool valid = cJSON_IsObject(current) && cJSON_IsObject(daily) &&
                        number_value(current, "temperature_2m", &current_temperature) &&
                        number_value(current, "relative_humidity_2m", &current_humidity) &&
@@ -111,6 +112,7 @@ static bool parse_weather_response(const weather_http_response_t *response,
                        first_array_number(daily, "temperature_2m_min", &minimum) &&
                        first_array_number(daily, "temperature_2m_max", &maximum) &&
                        first_array_number(daily, "precipitation_probability_max", &precipitation);
+    const bool moon_ok = first_array_number(daily, "moon_phase", &moon_phase);
     if (valid) {
         memset(weather, 0, sizeof(*weather));
         weather->valid                     = true;
@@ -120,6 +122,10 @@ static bool parse_weather_response(const weather_http_response_t *response,
         weather->minimum_temperature_c     = (float)minimum;
         weather->maximum_temperature_c     = (float)maximum;
         weather->precipitation_probability = (int)precipitation;
+        weather->moon_phase = (float)moon_phase;
+        weather->moon_illumination_percent =
+            (int)lroundf((1.0f - cosf((float)moon_phase * 6.28318530718f)) * 50.0f);
+        weather->moon_phase_valid = moon_ok;
         snprintf(weather->summary, sizeof(weather->summary), "%s",
                  weather_summary(weather->weather_code));
         weather->updated_ms = (uint32_t)(esp_timer_get_time() / 1000);
@@ -133,7 +139,7 @@ static esp_err_t fetch_weather(double latitude, double longitude, weather_data_t
     snprintf(url, sizeof(url),
              "https://api.open-meteo.com/v1/forecast?latitude=%.6f&longitude=%.6f"
              "&current=temperature_2m,relative_humidity_2m,weather_code"
-             "&daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max"
+             "&daily=temperature_2m_min,temperature_2m_max,precipitation_probability_max,moon_phase"
              "&forecast_days=1&timezone=auto",
              latitude, longitude);
 

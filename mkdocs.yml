@@ -19,6 +19,7 @@ nav:
       - Rust: rust.md
       - Arduino: arduino.md
   - HTTP API: api.md
+  - Bluetooth Low Energy: ble.md
   - Source reference:
       - C: reference/c.md
       - Python: reference/python.md

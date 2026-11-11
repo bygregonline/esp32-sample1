@@ -22,6 +22,9 @@ typedef struct {
     float minimum_temperature_c;
     float maximum_temperature_c;
     int precipitation_probability;
+    float moon_phase;
+    int moon_illumination_percent;
+    bool moon_phase_valid;
     uint32_t updated_ms;
     char summary[16];
 } weather_data_t;
@@ -31,6 +34,11 @@ typedef struct {
     float temperature_c;
     float humidity_percent;
     bool dht_valid;
+    float pressure_hpa;
+    bool bmp280_valid;
+    float moon_phase;
+    bool moon_phase_valid;
+    int moon_illumination_percent;
 
     bool gps_fix;
     bool gps_has_satellites;
@@ -54,6 +62,8 @@ typedef struct {
 
     /* Visibilidad de campos en el display (bitmask). */
     uint8_t display_fields_mask;
+    char event_log[3][40];
+    uint8_t event_log_count;
 } monitor_data_t;
 
 /* Bits para display_fields_mask. */
@@ -61,7 +71,9 @@ typedef struct {
 #define DISPLAY_FIELD_DHT (1u << 1)
 #define DISPLAY_FIELD_GPS (1u << 2)
 #define DISPLAY_FIELD_WEATHER (1u << 3)
-#define DISPLAY_FIELDS_ALL 0x0Fu
+#define DISPLAY_FIELD_PRESSURE (1u << 4)
+#define DISPLAY_FIELD_MOON (1u << 5)
+#define DISPLAY_FIELDS_ALL 0x3Fu
 
 typedef struct {
     monitor_data_t data;
@@ -71,6 +83,10 @@ typedef struct {
 void monitor_state_init(monitor_state_t *state);
 void monitor_state_set_sensors(monitor_state_t *state, float battery_voltage, float temperature_c,
                                float humidity_percent, bool dht_valid, uint32_t now_ms);
+void monitor_state_set_bmp280(monitor_state_t *state, float pressure_hpa, bool valid);
+void monitor_state_set_moon(monitor_state_t *state, float phase, int illumination_percent,
+                            bool valid);
+void monitor_state_log_event(monitor_state_t *state, const char *message);
 void monitor_state_set_gps(monitor_state_t *state, const gps_state_t *gps, uint32_t now_ms);
 void monitor_state_set_wifi(monitor_state_t *state, bool connected, const char *ssid,
                             const char *ip_address);

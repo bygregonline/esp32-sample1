@@ -10,10 +10,10 @@ SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.wokwi.defaults"
 . "$SCRIPT_DIR/activate-esp-idf.sh"
 
 cd "$PROJECT_DIR"
-if [ ! -f "$SDKCONFIG_FILE" ]; then
+if [ ! -f "$SDKCONFIG_FILE" ] || ! grep -q '^CONFIG_IDF_TARGET="esp32s3"$' "$SDKCONFIG_FILE"; then
     "$ESP_IDF_PYTHON" "$IDF_PATH/tools/idf.py" -B "$BUILD_DIR" \
         -D "SDKCONFIG=$SDKCONFIG_FILE" \
-        -D "SDKCONFIG_DEFAULTS=$SDKCONFIG_DEFAULTS" set-target esp32
+        -D "SDKCONFIG_DEFAULTS=$SDKCONFIG_DEFAULTS" set-target esp32s3
 fi
 
 "$ESP_IDF_PYTHON" "$IDF_PATH/tools/idf.py" -B "$BUILD_DIR" \

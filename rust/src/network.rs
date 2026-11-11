@@ -10,6 +10,7 @@ use embedded_svc::{
 };
 use esp_idf_svc::{
     eventloop::EspSystemEventLoop,
+    hal::modem::WifiModem,
     http::server::{Configuration as HttpServerConfig, EspHttpServer},
     nvs::{EspDefaultNvsPartition, EspNvs, NvsDefault},
     wifi::{
@@ -20,8 +21,10 @@ use esp_idf_svc::{
 
 use crate::monitor_state::{
     MonitorData, MonitorState, DISPLAY_FIELD_BATTERY, DISPLAY_FIELD_DHT, DISPLAY_FIELD_GPS,
-    DISPLAY_FIELD_WEATHER, SENSOR_INTERVAL_MAX_SECS, SENSOR_INTERVAL_MIN_SECS,
+    DISPLAY_FIELD_MOON, DISPLAY_FIELD_PRESSURE, DISPLAY_FIELD_WEATHER, SENSOR_INTERVAL_MAX_SECS,
+    SENSOR_INTERVAL_MIN_SECS,
 };
+use crate::moon_image::render_bmp;
 use crate::weather::start_weather_task;
 
 const PORTAL_SSID: &str = "ESP32-Monitor-Setup";
@@ -34,15 +37,30 @@ const INDEX_HTML: &str = concat!(
     "<meta name='viewport' content='width=device-width,initial-scale=1'>",
     "<title>ESP32 Monitor</title>",
     "<style>",
-    "body{font:15px system-ui;max-width:720px;margin:24px auto;padding:0 16px;",
-    "background:#0d1117;color:#e6edf3}",
+    "body{font:15px system-ui;max-width:1000px;margin:30px auto;padding:0 18px;",
+    "background:radial-gradient(ellipse at 50% -20%,#172c49 0,#0a101b 48%,#080c13 100%);",
+    "color:#e8f0fc;min-height:100vh}",
+    "h1{font-size:1.65rem;margin:0 0 4px;color:#f1f6ff;letter-spacing:-.03em}",
+    ".hero{padding-right:70px;min-height:60px;margin-bottom:18px}",
+    ".eyebrow{font-size:.7rem;color:#78b8ff;text-transform:uppercase;letter-spacing:.18em;margin:0 0 4px}",
+    ".refresh-badge{position:fixed;z-index:5;top:12px;right:12px;left:auto;width:54px;height:54px;",
+    "display:grid;place-items:center;border:1px solid #29415d;border-radius:16px;",
+    "background:#101a29ef;box-shadow:0 8px 30px #0008;backdrop-filter:blur(8px)}",
+    ".refresh-badge svg{position:absolute;width:42px;height:42px;transform:rotate(-90deg)}",
+    ".ring-track,.ring-progress{fill:none;stroke-width:3.5}.ring-track{stroke:#24364b}",
+    ".ring-progress{stroke:#54d6c7;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:0;transition:stroke-dashoffset .5s}",
+    "#refresh-time{font:600 10px ui-monospace,monospace;color:#e8f0fc}",
     "h1{color:#58a6ff;font-size:1.4rem}h2{color:#79c0ff;font-size:1rem;margin:0 0 8px}",
     "section{background:#161b22;padding:14px 16px;border-radius:10px;margin:10px 0;",
     "border:1px solid #21262d}",
-    ".grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}",
-    ".card{background:#0d1117;border-radius:8px;padding:10px 12px;border:1px solid #21262d}",
+    ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}",
+    ".card{background:#0b1420;border-radius:11px;padding:13px 14px;border:1px solid #1e3043;min-width:0}",
     ".lbl{font-size:.75rem;color:#8b949e;text-transform:uppercase;letter-spacing:.05em}",
     ".val{font-size:1.15rem;font-weight:600;margin-top:2px}",
+    ".moon-card{display:flex;align-items:center;gap:12px;min-height:82px}",
+    ".moon-card img{width:68px;height:68px;flex:0 0 68px;border-radius:50%;background:#03070c;",
+    "box-shadow:0 0 22px #79a9d455;border:1px solid #61778d;object-fit:cover}",
+    ".moon-title{font-size:1.05rem;font-weight:650}",
     ".ok{color:#3fb950}.warn{color:#d29922}.muted{color:#8b949e;font-size:.85rem}",
     "label{display:block;margin:8px 0 3px;font-size:.85rem;color:#8b949e}",
     "input,button{font:inherit;padding:9px 12px;width:100%;box-sizing:border-box;",
@@ -50,15 +68,28 @@ const INDEX_HTML: &str = concat!(
     "button{margin-top:10px;background:#238636;color:#fff;border:none}",
     "#msg,#wres{margin-top:8px;font-size:.85rem;color:#8b949e}",
     "</style>",
-    "<h1>ESP32 Monitor</h1>",
+    "<div class='refresh-badge' aria-label='Sensor refresh countdown'><svg viewBox='0 0 40 40'>",
+    "<circle class='ring-track' cx='20' cy='20' r='16'/><circle id='refresh-ring' class='ring-progress' cx='20' cy='20' r='16'/></svg>",
+    "<span id='refresh-time'>--</span></div>",
+    "<header class='hero'><p class='eyebrow'>LIVE SENSOR STATION</p><h1>ESP32 Monitor</h1></header>",
+    "<section><div class='grid'>",
+    "<div class='card'><div class='lbl'>Hora local</div><div class='val' id='clock'>--</div></div>",
+    "<div class='card'><div class='lbl'>IP address</div><div class='val' id='ip'>--</div></div>",
+    "</div></section>",
     "<section><h2>Lecturas</h2><div class='grid'>",
     "<div class='card'><div class='lbl'>Bateria</div><div class='val' id='bat'>--</div></div>",
     "<div class='card'><div class='lbl'>Temperatura</div><div class='val' id='temp'>--</div></div>",
     "<div class='card'><div class='lbl'>Humedad</div><div class='val' id='hum'>--</div></div>",
-    "<div class='card'><div class='lbl'>GPS</div><div class='val' id='gps'>--</div></div>",
-    "<div class='card'><div class='lbl'>Clima</div><div class='val' id='wx'>--</div></div>",
+    "<div class='card'><div class='lbl'>Pressure</div><div class='val' id='pressure'>--</div></div>",
+    "<div class='card'><div class='lbl'>Latitude</div><div class='val' id='lat'>--</div></div>",
+    "<div class='card'><div class='lbl'>Longitude</div><div class='val' id='lon'>--</div></div>",
+    "<div class='card'><div class='lbl'>Weather forecast</div><div class='val' id='wx'>--</div></div>",
+    "<div class='card moon-card'><img id='moon-photo' alt='Current moon phase' src='/moon.bmp'>",
+    "<div><div class='lbl'>Lunar phase</div><div class='moon-title' id='moon'>--</div>",
+    "<div class='muted' id='moon-illum'>Moon illumination</div></div></div>",
     "<div class='card'><div class='lbl'>Ciclo / prox.</div><div class='val' id='upd'>--</div></div>",
     "</div></section>",
+    "<section><h2>System log</h2><pre id='events'>Waiting for events...</pre></section>",
     "<section><h2>Ciclo de sensores</h2>",
     "<p class='muted'>Intervalo entre lecturas (5–300 s).</p>",
     "<label>Segundos</label><input id='iv' type='number' min='5' max='300' value='10'>",
@@ -78,15 +109,26 @@ const INDEX_HTML: &str = concat!(
     "async function r(){try{",
     "const d=await(await fetch('/api/status',{cache:'no-store'})).json();",
     "const s=d.sensors,g=d.gps,w=d.weather,rf=d.refresh;",
+    "set('clock',d.local_time||'--');set('ip',d.wifi.ip||'192.168.4.1');",
     "set('bat',s.battery_v.toFixed(2)+' V',s.battery_v>3.5?'ok':'warn');",
     "set('temp',s.temperature_c!=null?s.temperature_c.toFixed(1)+' C':'--',s.temperature_c!=null?'ok':'warn');",
     "set('hum',s.humidity_percent!=null?s.humidity_percent.toFixed(0)+' %':'--',s.humidity_percent!=null?'ok':'warn');",
-    "set('gps',g.fix?(g.latitude.toFixed(4)+', '+g.longitude.toFixed(4)):'Buscando',g.fix?'ok':'warn');",
-    "set('wx',w.available?w.summary+' '+w.current_temperature_c.toFixed(1)+'C':'Sin datos',w.available?'ok':'muted');",
+    "set('pressure',s.pressure_hpa!=null?s.pressure_hpa.toFixed(1)+' hPa':'Sensor unavailable',s.bmp280_valid?'ok':'muted');",
+    "set('lat',g.fix?g.latitude.toFixed(5):'--',g.fix?'ok':'warn');set('lon',g.fix?g.longitude.toFixed(5):'--',g.fix?'ok':'warn');",
+    "set('wx',w.available?w.summary+' '+w.current_temperature_c.toFixed(1)+'C · '+w.minimum_temperature_c.toFixed(0)+'/'+w.maximum_temperature_c.toFixed(0)+'C · rain '+w.precipitation_probability+'%':'Sin datos',w.available?'ok':'muted');",
+    "set('moon',w.moon_phase!=null?moonName(w.moon_phase):'--');",
+    "set('moon-illum',w.moon_illumination_percent!=null?w.moon_illumination_percent+'% illuminated':'Moon data unavailable','muted');",
+    "if(w.moon_phase!=null){const k=Math.floor(w.moon_phase*255),im=document.getElementById('moon-photo');",
+    "if(im.dataset.phase!==String(k)){im.dataset.phase=String(k);im.src='/moon.bmp?v='+k;}}",
+    "document.getElementById('events').textContent=(d.events||[]).join('\\n')||'No events yet';",
     "set('upd',rf.interval_seconds+'s / '+(rf.remaining_seconds>=0?rf.remaining_seconds+'s':'esperando'),'ok');",
+    "document.getElementById('refresh-time').textContent=rf.remaining_seconds>=0?",
+    "(String(Math.floor(rf.remaining_seconds/60)).padStart(2,'0')+':'+String(rf.remaining_seconds%60).padStart(2,'0')):'--:--';",
+    "document.getElementById('refresh-ring').style.strokeDashoffset=String(100*(1-Math.max(0,Math.min(1,rf.remaining_seconds/(rf.interval_seconds||1)))));",
     "document.getElementById('iv').value=rf.interval_seconds;",
     "}catch(e){}}",
     "function set(id,v,c){const e=document.getElementById(id);e.textContent=v;e.className='val '+(c||'');}",
+    "function moonName(p){return p<.035||p>=.965?'New moon':p<.22?'Waxing crescent':p<.28?'First quarter':p<.47?'Waxing gibbous':p<.53?'Full moon':p<.72?'Waning gibbous':p<.78?'Last quarter':'Waning crescent';}",
     "setInterval(r,2000);r();",
     "async function setIv(){const v=parseInt(document.getElementById('iv').value,10);",
     "if(isNaN(v)||v<5||v>300){document.getElementById('msg').textContent='Rango 5-300';return;}",
@@ -121,7 +163,7 @@ fn weather_json(data: &MonitorData, now_ms: u64) -> String {
     };
     let stale = w.valid && age > data.refresh_interval_secs as u64 * 2;
     format!(
-        r#"{{"available":{av},"summary":"{sum}","weather_code":{code},"current_temperature_c":{ct},"current_humidity_percent":{ch},"minimum_temperature_c":{mn},"maximum_temperature_c":{mx},"precipitation_probability":{pp},"age_seconds":{age},"stale":{stale}}}"#,
+        r#"{{"available":{av},"summary":"{sum}","weather_code":{code},"current_temperature_c":{ct},"current_humidity_percent":{ch},"minimum_temperature_c":{mn},"maximum_temperature_c":{mx},"precipitation_probability":{pp},"moon_phase":{phase},"moon_illumination_percent":{illum},"age_seconds":{age},"stale":{stale}}}"#,
         av = w.valid,
         sum = if w.valid { &w.summary } else { "SIN DATOS" },
         code = if w.valid {
@@ -138,18 +180,44 @@ fn weather_json(data: &MonitorData, now_ms: u64) -> String {
         } else {
             "null".to_string()
         },
+        phase = num_or_null(w.moon_phase_valid, w.moon_phase as f64),
+        illum = if w.moon_phase_valid {
+            w.moon_illumination_percent.to_string()
+        } else {
+            "null".to_string()
+        },
         age = age,
         stale = stale,
     )
 }
 
-fn status_json(data: &MonitorData, now_ms: u64, remaining: i32) -> String {
+fn events_json(data: &MonitorData) -> String {
     format!(
-        r#"{{"sensors":{{"battery_v":{bv:.3},"temperature_c":{tc},"humidity_percent":{hp},"dht_valid":{dv},"last_read_ms":{lr}}},"gps":{{"fix":{gf},"latitude":{lat},"longitude":{lon},"satellites":{sat}}},"wifi":{{"connected":{wc},"ssid":"{ssid}","ip":"{ip}"}},"refresh":{{"interval_seconds":{iv},"weather_interval_seconds":{wiv},"remaining_seconds":{rem}}},"display_mask":{dm},"weather":{wx}}}"#,
+        "[{}]",
+        data.events
+            .iter()
+            .map(|e| format!("\"{}\"", e))
+            .collect::<Vec<_>>()
+            .join(",")
+    )
+}
+
+fn status_json(data: &MonitorData, now_ms: u64, remaining: i32) -> String {
+    let clock = crate::display::clock_text();
+    format!(
+        r#"{{"sensors":{{"battery_v":{bv:.3},"temperature_c":{tc},"humidity_percent":{hp},"dht_valid":{dv},"pressure_hpa":{pressure},"bmp280_valid":{bmp},"moon_phase":{phase},"moon_illumination_percent":{illum},"last_read_ms":{lr}}},"gps":{{"fix":{gf},"latitude":{lat},"longitude":{lon},"satellites":{sat}}},"wifi":{{"connected":{wc},"ssid":"{ssid}","ip":"{ip}"}},"refresh":{{"interval_seconds":{iv},"weather_interval_seconds":{wiv},"remaining_seconds":{rem}}},"display_mask":{dm},"weather":{wx},"events":{events},"local_time":"{clock}"}}"#,
         bv = data.battery_voltage,
         tc = num_or_null(data.dht_valid, data.temperature_c as f64),
         hp = num_or_null(data.dht_valid, data.humidity_percent as f64),
         dv = data.dht_valid,
+        pressure = num_or_null(data.bmp280_valid, data.pressure_hpa as f64),
+        bmp = data.bmp280_valid,
+        phase = num_or_null(data.moon_phase_valid, data.moon_phase as f64),
+        illum = if data.moon_phase_valid {
+            data.moon_illumination_percent.to_string()
+        } else {
+            "null".to_string()
+        },
         lr = data.last_sensor_read_ms,
         gf = data.gps_fix,
         lat = num_or_null(data.gps_fix, data.latitude),
@@ -167,10 +235,13 @@ fn status_json(data: &MonitorData, now_ms: u64, remaining: i32) -> String {
         rem = remaining,
         dm = data.display_mask,
         wx = weather_json(data, now_ms),
+        events = events_json(data),
+        clock = clock.as_str(),
     )
 }
 
 fn sensors_json(data: &MonitorData, now_ms: u64) -> String {
+    let clock = crate::display::clock_text();
     let elapsed = if now_ms > data.last_sensor_read_ms {
         (now_ms - data.last_sensor_read_ms) / 1000
     } else {
@@ -178,11 +249,19 @@ fn sensors_json(data: &MonitorData, now_ms: u64) -> String {
     };
     let remaining = data.sensor_interval_secs.saturating_sub(elapsed as u32);
     format!(
-        r#"{{"battery_v":{bv:.3},"temperature_c":{tc},"humidity_percent":{hp},"dht_valid":{dv},"gps_fix":{gf},"latitude":{lat},"longitude":{lon},"satellites":{sat},"last_read_ms":{lr},"interval_seconds":{iv},"remaining_seconds":{rem}}}"#,
+        r#"{{"battery_v":{bv:.3},"temperature_c":{tc},"humidity_percent":{hp},"dht_valid":{dv},"pressure_hpa":{pressure},"bmp280_valid":{bmp},"moon_phase":{phase},"moon_illumination_percent":{illum},"gps_fix":{gf},"latitude":{lat},"longitude":{lon},"satellites":{sat},"last_read_ms":{lr},"interval_seconds":{iv},"remaining_seconds":{rem},"local_time":"{clock}"}}"#,
         bv = data.battery_voltage,
         tc = num_or_null(data.dht_valid, data.temperature_c as f64),
         hp = num_or_null(data.dht_valid, data.humidity_percent as f64),
         dv = data.dht_valid,
+        pressure = num_or_null(data.bmp280_valid, data.pressure_hpa as f64),
+        bmp = data.bmp280_valid,
+        phase = num_or_null(data.moon_phase_valid, data.moon_phase as f64),
+        illum = if data.moon_phase_valid {
+            data.moon_illumination_percent.to_string()
+        } else {
+            "null".to_string()
+        },
         gf = data.gps_fix,
         lat = num_or_null(data.gps_fix, data.latitude),
         lon = num_or_null(data.gps_fix, data.longitude),
@@ -194,6 +273,7 @@ fn sensors_json(data: &MonitorData, now_ms: u64) -> String {
         lr = data.last_sensor_read_ms,
         iv = data.sensor_interval_secs,
         rem = remaining,
+        clock = clock.as_str(),
     )
 }
 
@@ -231,7 +311,7 @@ fn read_body(req: &mut impl Read, max: usize) -> Vec<u8> {
 }
 
 // ── Lanzar el servidor ─────────────────────────────────────────────────────
-pub fn start_network(state: MonitorState) -> anyhow::Result<()> {
+pub fn start_network(state: MonitorState, modem: WifiModem<'static>) -> anyhow::Result<()> {
     // --- NVS para credenciales ---
     let nvs_partition = EspDefaultNvsPartition::take()?;
     let nvs: Arc<Mutex<EspNvs<NvsDefault>>> = Arc::new(Mutex::new(EspNvs::new(
@@ -265,11 +345,7 @@ pub fn start_network(state: MonitorState) -> anyhow::Result<()> {
     // --- Wi-Fi ---
     let sys_loop = EspSystemEventLoop::take()?;
     let mut wifi = BlockingWifi::wrap(
-        EspWifi::new(
-            unsafe { esp_idf_svc::hal::peripherals::Peripherals::steal() }.modem,
-            sys_loop.clone(),
-            Some(nvs_partition),
-        )?,
+        EspWifi::new(modem, sys_loop.clone(), Some(nvs_partition))?,
         sys_loop.clone(),
     )?;
 
@@ -309,6 +385,7 @@ pub fn start_network(state: MonitorState) -> anyhow::Result<()> {
         PORTAL_SSID,
         PORTAL_AP_CODE
     );
+    state.log_event("Setup AP ready");
 
     // Mantener wifi vivo en un Arc para que no se droppe
     let _wifi = Arc::new(Mutex::new(wifi));
@@ -324,6 +401,29 @@ pub fn start_network(state: MonitorState) -> anyhow::Result<()> {
         ..Default::default()
     };
     let mut server = EspHttpServer::new(&server_config)?;
+
+    // GET /moon.bmp — small phase image generated into a response buffer.
+    {
+        let s = state.clone();
+        server.fn_handler::<anyhow::Error, _>("/moon.bmp", Method::Get, move |req| {
+            let data = s.snapshot();
+            let bmp = render_bmp(if data.moon_phase_valid {
+                data.moon_phase
+            } else {
+                0.0
+            });
+            let mut resp = req.into_response(
+                200,
+                None,
+                &[
+                    ("Content-Type", "image/bmp"),
+                    ("Cache-Control", "private, max-age=3600"),
+                ],
+            )?;
+            resp.write_all(&bmp)?;
+            Ok(())
+        })?;
+    }
 
     // GET /
     {
@@ -446,6 +546,8 @@ pub fn start_network(state: MonitorState) -> anyhow::Result<()> {
                 ("\"dht\"",     DISPLAY_FIELD_DHT),
                 ("\"gps\"",     DISPLAY_FIELD_GPS),
                 ("\"weather\"", DISPLAY_FIELD_WEATHER),
+                ("\"pressure\"", DISPLAY_FIELD_PRESSURE),
+                ("\"moon\"", DISPLAY_FIELD_MOON),
             ] {
                 if let Some(pos) = text.find(key) {
                     let rest = &text[pos + key.len()..];
@@ -463,12 +565,14 @@ pub fn start_network(state: MonitorState) -> anyhow::Result<()> {
             log::info!("Display mask: 0x{:02x}", m);
             send_json(&mut req.into_ok_response()?,
                       &format!(
-                          r#"{{"ok":true,"display_mask":{m},"battery":{b},"dht":{d},"gps":{g},"weather":{w}}}"#,
+                          r#"{{"ok":true,"display_mask":{m},"battery":{b},"dht":{d},"gps":{g},"weather":{w},"pressure":{p},"moon":{moon}}}"#,
                           m = m,
                           b = (m & DISPLAY_FIELD_BATTERY) != 0,
                           d = (m & DISPLAY_FIELD_DHT)     != 0,
                           g = (m & DISPLAY_FIELD_GPS)     != 0,
                           w = (m & DISPLAY_FIELD_WEATHER) != 0,
+                          p = (m & DISPLAY_FIELD_PRESSURE) != 0,
+                          moon = (m & DISPLAY_FIELD_MOON) != 0,
                       ));
             Ok(())
         })?;

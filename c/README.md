@@ -1,6 +1,6 @@
 # Firmware C con ESP-IDF
 
-Proyecto C para ESP-IDF 5.x y ESP32 clásico (DevKit/WROOM-32, Xtensa). No requiere tener la placa conectada para compilar; el archivo `.bin` se puede guardar y flashear cuando haya hardware disponible.
+Proyecto C para ESP-IDF 5.x y placa ESP32-S3 N16R8 de doble USB-C (16 MB flash y 8 MB PSRAM), usando la referencia GPIO ESP32-S3-DevKitC-1. Verifica el rotulado de tu placa antes de cablear. No requiere tenerla conectada para compilar; el archivo `.bin` se puede guardar y flashear cuando haya hardware disponible.
 
 ## Diagramas y pantallas
 
@@ -14,7 +14,11 @@ Proyecto C para ESP-IDF 5.x y ESP32 clásico (DevKit/WROOM-32, Xtensa). No requi
 
 ### Vista de las pantallas
 
-![Vista esperada de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32.png)
+![Vista esperada de las pantallas LCD y OLED](../docs/visuals/mockup-displays-esp32-v3.svg)
+
+### Panel web
+
+![Vista previa del dashboard web ESP32](../docs/visuals/mockup-web-dashboard.png)
 
 El montaje coloca el ESP32 al centro, las pantallas a la izquierda y los sensores a la derecha. Consulta el [mapa de filas y resistencias](../README.md#wiring-diagrams-and-display-mockup) antes de cablear; los GPIO efectivos están en [`main/config.h`](main/config.h).
 
@@ -23,19 +27,24 @@ El montaje coloca el ESP32 al centro, las pantallas a la izquierda y los sensore
 - LCD Waveshare ST7789V2 de 170 × 320 por SPI, desplazamiento X 35.
 - OLED SSD1306 de 128 × 64 por I2C `0x3C`.
 - Lectura DHT22 con temporización por microsegundos.
+- BMP280-3.3 en I²C1 GPIO1/2, con búsqueda en 0x76 y 0x77 y lectura de presión en hPa.
 - GPS NEO-6M por UART1 a 9600 baudios, con lectura RMC/GGA y verificación NMEA.
-- ADC1 GPIO34 con calibración del ESP-IDF cuando el chip/compilación la ofrece.
+- ADC1 GPIO4 (ADC1_CH3) con calibración del ESP-IDF cuando el chip/compilación la ofrece.
 - Portal Wi-Fi protegido en SoftAP para elegir la red desde un navegador; las credenciales se guardan en NVS.
 - Servidor web local con panel HTML y endpoints JSON para sensores, GPS, Wi-Fi y clima.
+- Servicio BLE NimBLE de solo lectura, con snapshots en JSON, texto, YAML y XML.
 - Pronóstico de Open-Meteo basado en la ubicación reciente del GPS. Se consulta cada cinco minutos si hay Wi-Fi, señal GPS e internet.
-- Pronóstico en ambas pantallas y cuenta regresiva de actualización; la LCD a color muestra un anillo que se reduce con el tiempo.
+- Fecha y hora sincronizadas por NTP y configuradas con `MONITOR_TZ` en el `.env` (por defecto `CST6`, horario central de México).
+- Pronóstico, fase e iluminación lunar; la LCD muestra coordenadas GPS, presión, una imagen lunar de fase variable, cuenta regresiva circular y logger de eventos.
+- El anillo pequeño de cuenta regresiva aparece arriba a la derecha, en el encabezado de fecha/hora e IP de la LCD y del dashboard web.
+- APIs `/api/status`, `/api/sensors`, `/api/weather` y `/moon.bmp` con presión, fase lunar, hora local y eventos recientes. La imagen lunar se renderiza como BMP 64×64 en un buffer compartido con el servidor HTTP.
 - Ejemplo de inferencia TensorFlow Lite Micro `float32` basado en el modelo público Hello World.
 
-Los pines y factores están en [`main/config.h`](main/config.h). Para el voltaje usa el divisor documentado en el README raíz: resistencia de 12 kΩ entre salida `S` del módulo y GPIO34, y resistencia de 10 kΩ entre GPIO34 y GND. Calibra `VOLTAGE_CALIBRATION` comparando con un multímetro.
+Los pines y factores están en [`main/config.h`](main/config.h). Para el voltaje usa el divisor documentado en el README raíz: resistencia de 12 kΩ entre salida `S` del módulo y GPIO4, y resistencia de 10 kΩ entre GPIO4 y GND. Calibra `VOLTAGE_CALIBRATION` comparando con un multímetro.
 
 ## TensorFlow Lite Micro: prueba float32
 
-El firmware incluye el modelo de demostración [Hello World de TensorFlow Lite Micro](https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/hello_world), que aproxima `sin(x)`. Usamos TFLM para ejercitar inferencia `float32` en el CPU/FPU del ESP32 clásico. Este chip tiene FPU, no TPU: la prueba valida la integración del runtime, pero no es una prueba de TPU, un benchmark de rendimiento, un pronóstico meteorológico ni una clasificación de sensores.
+El firmware incluye el modelo de demostración [Hello World de TensorFlow Lite Micro](https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/hello_world), que aproxima `sin(x)`. Usamos TFLM para ejercitar inferencia `float32` en el CPU/FPU del ESP32-S3. Este chip tiene FPU, no TPU: la prueba valida la integración del runtime, pero no es una prueba de TPU, un benchmark de rendimiento, un pronóstico meteorológico ni una clasificación de sensores.
 
 Cada vez que se actualizan las lecturas, el firmware normaliza la temperatura y la humedad del DHT22 al rango esperado y las entrega al modelo en dos inferencias separadas, porque el modelo recibe un solo valor por vez. Si el DHT22 no está disponible, normaliza el voltaje de batería como entrada de respaldo. Las predicciones se registran en el monitor serial con la etiqueta `TFLM demo`; no modifican las pantallas ni los valores que entrega la API.
 
@@ -110,3 +119,7 @@ Endpoints disponibles:
 El pronóstico consulta `https://api.open-meteo.com/v1/forecast` con latitud y longitud del último fix GPS válido. Se muestran las condiciones actuales, mínima y máxima del día y probabilidad de precipitación. No requiere una clave de API para este uso. Si aún no hay fix, no hay internet o falla la consulta, las pantallas indican que esperan datos y el servidor mantiene los últimos valores disponibles.
 
 El periodo está definido por `WEATHER_REFRESH_INTERVAL_SECONDS` en `main/monitor_state.h` (300 segundos por defecto). La conexión HTTPS necesita que el reloj se sincronice por SNTP; el dispositivo debe poder acceder a `pool.ntp.org` además de Open-Meteo.
+
+## Bluetooth Low Energy
+
+El firmware anuncia `ESP32-Monitor`. Un central BLE puede descubrir el servicio `0xFFA0` y leer `0xFFA1` (JSON), `0xFFA2` (texto), `0xFFA3` (YAML) o `0xFFA4` (XML). Los valores llevan la telemetría actual y caben en el límite de atributo GATT de 512 bytes. La compilación activa NimBLE periférico; al ser lecturas públicas, no requiere pairing.

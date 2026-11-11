@@ -7,6 +7,7 @@ resolver = "2"
 
 # ── ESP-IDF std runtime ───────────────────────────────────────────────────
 [dependencies]
+enumset = "=1.1.10"
 esp-idf-svc = { version = "=0.53.0", features = [
     "std",
 ] }
@@ -29,6 +30,9 @@ log      = "=0.4"
 # ── anyhow for error handling ─────────────────────────────────────────────
 anyhow = { version = "=1.0", default-features = false }
 
+[patch.crates-io]
+esp-idf-svc = { path = "vendor/esp-idf-svc" }
+
 # ── Build ─────────────────────────────────────────────────────────────────
 [build-dependencies]
 embuild = "=0.33.7"
@@ -36,10 +40,7 @@ embuild = "=0.33.7"
 # Reuse the same native ESP-IDF TensorFlow Lite Micro component and model as C.
 [package.metadata.esp-idf-sys]
 extra_components = [
-    {
-        component_dirs = ["../components/tflm_demo"],
-        bindings_header = "../components/tflm_demo/include/ml_demo.h",
-    },
+    { component_dirs = ["../components/tflm_demo"], bindings_header = "../components/tflm_demo/include/ml_demo.h" },
 ]
 
 # ── Profiles ──────────────────────────────────────────────────────────────

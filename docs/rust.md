@@ -1,6 +1,6 @@
 # Rust / ESP-IDF
 
-The Rust implementation uses the Espressif Xtensa toolchain and `esp-idf-svc` with `std`. Its pin assignments are in `rust/src/main.rs`.
+The Rust implementation targets a dual-USB-C ESP32-S3 N16R8 development board using the Espressif Xtensa toolchain and `esp-idf-svc` with `std`. GPIO assignments follow the ESP32-S3-DevKitC-1 reference; verify the printed pin labels on the purchased carrier board. It serves the auto-refreshing web dashboard/API and a NimBLE GATT service with JSON, text, YAML, and XML snapshots. Its pin assignments are in `rust/src/main.rs`; its register-level BMP280 driver uses I²C1 on GPIO1/2.
 
 ```sh
 cd rust

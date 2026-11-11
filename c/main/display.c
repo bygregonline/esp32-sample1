@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "config.h"
 #include "driver/gpio.h"
@@ -193,6 +194,44 @@ static void lcd_draw_refresh_ring(display_t *d, int cx, int cy, int radius, int 
     }
 }
 
+/* Miniature moon disk with a phase-shaped terminator for the color LCD. */
+static void lcd_draw_moon_icon(display_t *d, int cx, int cy, float phase, bool valid) {
+    const int radius = 10;
+    const int diameter = radius * 2 + 1;
+    const float angle = (valid ? phase : 0.0f) * 6.28318530718f;
+    const float sun_x = sinf(angle);
+    const float sun_z = -cosf(angle);
+    uint8_t row[21 * 2];
+
+    for (int dy = -radius; dy <= radius; ++dy) {
+        for (int dx = -radius; dx <= radius; ++dx) {
+            const float nx = (float)dx / radius;
+            const float ny = (float)dy / radius;
+            const float r2 = nx * nx + ny * ny;
+            uint16_t color = 0x0000;
+            if (r2 <= 1.0f) {
+                const float nz = sqrtf(1.0f - r2);
+                const float light = nx * sun_x + nz * sun_z;
+                const uint8_t shade = light > 0.0f ? (uint8_t)(175 + nz * 65) : 19;
+                color = rgb565(shade, shade, (uint8_t)(shade + (light > 0.0f ? 5 : 4)));
+                /* A few small maria/crater marks keep the disk recognizable. */
+                const float c1x = nx - 0.28f, c1y = ny + 0.25f;
+                const float c2x = nx + 0.35f, c2y = ny - 0.20f;
+                if (light > 0.0f && (c1x * c1x + c1y * c1y < 0.025f ||
+                                     c2x * c2x + c2y * c2y < 0.018f)) {
+                    const uint8_t crater = shade > 35 ? (uint8_t)(shade - 35) : shade;
+                    color = rgb565(crater, crater, crater);
+                }
+            }
+            const int pixel = dx + radius;
+            row[pixel * 2] = (uint8_t)(color >> 8);
+            row[pixel * 2 + 1] = (uint8_t)color;
+        }
+        lcd_set_window(d, cx - radius, cy + dy, diameter, 1);
+        (void)lcd_transfer(d, row, sizeof(row), 1);
+    }
+}
+
 /* ── OLED (I2C directo, sin librería) ────────────────────────────────────── */
 static esp_err_t oled_write(const uint8_t *data, size_t len) {
     return i2c_master_write_to_device(OLED_I2C_PORT, OLED_I2C_ADDRESS, data, len,
@@ -345,20 +384,19 @@ esp_err_t display_init(display_t *display) {
  * display_render — Dibuja todo el estado en LCD (170×320) y OLED (128×64)
  *
  * Layout LCD (vertical, de arriba hacia abajo):
- *   y=  4  Título "ESP32 MONITOR"
- *   y= 13  Separador
- *   y= 20  Wi-Fi: estado + IP  o  mensaje de configuración
+ *   y=  4  Fecha y hora local
+ *   y= 20  IP de Wi-Fi o dirección del AP de configuración
+ *   x=149  Anillo pequeño MM:SS en el extremo derecho de la cabecera
  *   y= 36  BATERIA + voltaje
- *   y= 44  Separador
+ *   y= 46  Separador
  *   y= 52  TEMPERATURA + valor  /  HUMEDAD + valor
  *   y= 68  Separador
  *   y= 76  GPS: estado, LAT, LON
- *   y=108  Separador
- *   y=116  CLIMA: resumen, T actual, min/max, lluvia %
- *   y=160  Separador
- *   y=168  "UPDATE" label + intervalo en segundos
- *   y=180  Anillo de countdown (radio 40) centrado en y=236
- *   y=232  Tiempo MM:SS centrado dentro del anillo
+ *   y=104  Separador
+ *   y=110  CLIMA: resumen, T actual, min/max, lluvia %
+ *   y=158  Presión y fase lunar
+ *   y=188  Intervalo entre actualizaciones
+ *   y=220  Logger del sistema
  *
  * Layout OLED (128×64, 8 filas de 8 px):
  *   0  Wi-Fi
@@ -389,15 +427,20 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
     const uint8_t mask = data->display_fields_mask;
 
     /* Título */
-    lcd_draw_text(display, "ESP32 MONITOR", 4, 4, C_TITLE);
-    lcd_draw_hline(display, 14, C_DIM);
+    time_t epoch = time(NULL);
+    struct tm local_time;
+    if (epoch > 1700000000 && localtime_r(&epoch, &local_time))
+        strftime(text, sizeof(text), "%a %d %b %H:%M", &local_time);
+    else
+        snprintf(text, sizeof(text), "TIME SYNCING");
+    lcd_draw_text(display, text, 4, 4, C_TITLE);
 
-    /* Wi-Fi */
+    /* Keep the date and IP together in the top status band. */
     if (data->wifi_connected) {
-        snprintf(text, sizeof(text), "WIFI %-12.12s  %.15s", data->wifi_ssid, data->ip_address);
+        snprintf(text, sizeof(text), "IP %.15s", data->ip_address);
         lcd_draw_text(display, text, 4, 20, C_OK);
     } else {
-        lcd_draw_text(display, "WIFI  SIN CONEXION  AP:192.168.4.1", 4, 20, C_WARN);
+        lcd_draw_text(display, "IP 192.168.4.1", 4, 20, C_WARN);
     }
 
     /* Batería */
@@ -407,6 +450,14 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
         lcd_draw_text(display, text, 28, 36, data->battery_voltage > 3.5f ? C_OK : C_WARN);
     }
     lcd_draw_hline(display, 46, C_DIM);
+    /* Upper-right countdown ring shares the date/IP status band. */
+    const int ring_cx = LCD_WIDTH - 21;
+    lcd_draw_refresh_ring(display, ring_cx, 23, 20, remaining,
+                          data->sensor_interval_seconds);
+    if (remaining >= 0) snprintf(text, sizeof(text), "%02d:%02d", remaining / 60, remaining % 60);
+    else snprintf(text, sizeof(text), "--:--");
+    for (size_t i = 0; text[i]; ++i)
+        lcd_draw_char(display, text[i], ring_cx - 15 + (int)i * 6, 19, C_VALUE, 0x0000);
 
     /* Temperatura y Humedad */
     if (mask & DISPLAY_FIELD_DHT) {
@@ -427,9 +478,7 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
     if (mask & DISPLAY_FIELD_GPS) {
         lcd_draw_text(display, "GPS", 4, 68, C_LABEL);
         if (data->gps_fix) {
-            snprintf(text, sizeof(text), "FIX  SAT %d",
-                     data->gps_has_satellites ? data->satellites : 0);
-            lcd_draw_text(display, text, 28, 68, C_OK);
+            lcd_draw_text(display, "GPS FIX", 28, 68, C_OK);
             snprintf(text, sizeof(text), "LAT %.5f", data->latitude);
             lcd_draw_text(display, text, 4, 80, C_VALUE);
             snprintf(text, sizeof(text), "LON %.5f", data->longitude);
@@ -461,39 +510,49 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
             lcd_draw_text(display, "MIN --  MAX --  P --", 4, 134, C_DIM);
         }
     }
-    lcd_draw_hline(display, 158, C_DIM);
+    if (mask & DISPLAY_FIELD_PRESSURE) {
+        snprintf(text, sizeof(text), "PRESS %.1f hPa", data->pressure_hpa);
+        lcd_draw_text(display, data->bmp280_valid ? text : "PRESS -- hPa", 4, 158,
+                      data->bmp280_valid ? C_OK : C_DIM);
+    }
+    if (mask & DISPLAY_FIELD_MOON) {
+        const char *phase = !data->moon_phase_valid ? "--" :
+                            data->moon_phase < 0.035f || data->moon_phase >= 0.965f ? "NEW" :
+                            data->moon_phase < 0.22f ? "WAX CRES" :
+                            data->moon_phase < 0.28f ? "FIRST Q" :
+                            data->moon_phase < 0.47f ? "WAX GIB" :
+                            data->moon_phase < 0.53f ? "FULL" :
+                            data->moon_phase < 0.72f ? "WAN GIB" :
+                            data->moon_phase < 0.78f ? "LAST Q" : "WAN CRES";
+        snprintf(text, sizeof(text), "MOON %s %d%%", phase,
+                 data->moon_illumination_percent);
+        lcd_draw_text(display, text, 4, 170, C_WEATHER);
+        lcd_draw_moon_icon(display, LCD_WIDTH - 16, 171, data->moon_phase,
+                           data->moon_phase_valid);
+    }
+    lcd_draw_hline(display, 182, C_DIM);
 
-    /* Intervalo de ciclo + anillo de countdown */
-    lcd_draw_text(display, "UPDATE", 4, 164, C_LABEL);
+    /* Sensor update interval; remaining time is in the upper-right ring. */
+    lcd_draw_text(display, "UPDATE", 4, 188, C_LABEL);
     snprintf(text, sizeof(text), "%us", (unsigned)data->sensor_interval_seconds);
-    lcd_draw_text(display, text, 52, 164, C_VALUE);
-
-    lcd_draw_refresh_ring(display, LCD_WIDTH / 2, 220, 38, remaining,
-                          data->sensor_interval_seconds);
-
-    /* Número MM:SS dentro del anillo */
-    if (remaining >= 0) {
-        snprintf(text, sizeof(text), "%02d:%02d", remaining / 60, remaining % 60);
-    } else {
-        snprintf(text, sizeof(text), "--:--");
-    }
-    /* Centrado: 5 chars × 6 px = 30 px */
-    const int ring_text_x = LCD_WIDTH / 2 - 15;
-    for (size_t i = 0; text[i]; ++i) {
-        lcd_draw_char(display, text[i], ring_text_x + (int)i * 6, 216, C_VALUE, 0x0000);
-    }
+    lcd_draw_text(display, text, 52, 188, C_VALUE);
+    lcd_draw_hline(display, 216, C_DIM);
+    lcd_draw_text(display, "SYSTEM LOG", 4, 220, C_LABEL);
+    for (uint8_t i = 0; i < data->event_log_count && i < 3; ++i)
+        lcd_draw_text(display, data->event_log[i], 4, 232 + i * 10, C_VALUE);
 
     /* ── OLED ───────────────────────────────────────────────────────────── */
     memset(display->oled_buffer, 0, sizeof(display->oled_buffer));
 
     /* Línea 0 — Wi-Fi */
-    oled_text(display, data->wifi_connected ? "WIFI OK" : "WIFI CONFIG", 0, 0);
+    if (epoch > 1700000000 && localtime_r(&epoch, &local_time))
+        strftime(text, sizeof(text), "%a %d %b %H:%M", &local_time);
+    else snprintf(text, sizeof(text), "TIME SYNCING");
+    oled_text(display, text, 0, 0);
 
     /* Línea 1 — Batería */
-    if (mask & DISPLAY_FIELD_BATTERY) {
-        snprintf(text, sizeof(text), "BAT %.2fV", data->battery_voltage);
-        oled_text(display, text, 0, 8);
-    }
+    snprintf(text, sizeof(text), "IP %.15s", data->wifi_connected ? data->ip_address : "AP 192.168.4.1");
+    oled_text(display, text, 0, 8);
 
     /* Línea 2 — Temperatura y Humedad */
     if (mask & DISPLAY_FIELD_DHT) {
@@ -506,17 +565,27 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
         oled_text(display, text, 0, 16);
     }
 
+    snprintf(text, sizeof(text), "P %.0fhPa", data->pressure_hpa);
+    oled_text(display, data->bmp280_valid ? text : "P -- hPa", 0, 24);
     /* Líneas 3-4 — GPS */
     if (mask & DISPLAY_FIELD_GPS) {
         if (data->gps_fix) {
             snprintf(text, sizeof(text), "LAT %.4f", data->latitude);
-            oled_text(display, text, 0, 24);
-            snprintf(text, sizeof(text), "LON %.4f", data->longitude);
             oled_text(display, text, 0, 32);
+            snprintf(text, sizeof(text), "LON %.4f", data->longitude);
+            oled_text(display, text, 0, 40);
         } else {
-            oled_text(display, "GPS BUSCANDO", 0, 24);
-            oled_text(display, "LAT/LON --", 0, 32);
+            oled_text(display, "GPS BUSCANDO", 0, 32);
+            oled_text(display, "LAT/LON --", 0, 40);
         }
+    }
+    if (mask & DISPLAY_FIELD_WEATHER) {
+        if (data->weather.valid)
+            snprintf(text, sizeof(text), "WX %-8.8s %.0fC", data->weather.summary,
+                     data->weather.current_temperature_c);
+        else
+            snprintf(text, sizeof(text), "WEATHER WAITING");
+        oled_text(display, text, 0, 48);
     }
 
     /* Líneas 5-6 — Clima */

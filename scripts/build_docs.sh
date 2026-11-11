@@ -53,7 +53,7 @@ if (( build_rust )); then
         source ./export-esp.sh
         cargo doc --locked --no-deps --document-private-items --target-dir "$rust_target_dir"
     )
-    rust_doc_dir="$rust_target_dir/xtensa-esp32-espidf/doc"
+    rust_doc_dir="$rust_target_dir/xtensa-esp32s3-espidf/doc"
     if [[ ! -d "$rust_doc_dir" ]]; then
         rust_doc_dir="$rust_target_dir/doc"
     fi

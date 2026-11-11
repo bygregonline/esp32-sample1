@@ -16,10 +16,15 @@
 #include "esp_timer.h"
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "moon_image.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "weather.h"
+#ifndef CONFIG_MONITOR_WOKWI_SIMULATION
+#include "ble_server.h"
+#endif
 
 static const char *TAG = "network";
 #ifndef CONFIG_MONITOR_WOKWI_SIMULATION
@@ -33,6 +38,8 @@ static httpd_handle_t s_server;
 static bool s_have_credentials;
 static bool s_sntp_started;
 static char s_saved_ssid[33];
+static uint8_t s_moon_image_buffer[MOON_BMP_SIZE];
+static SemaphoreHandle_t s_moon_image_mutex;
 
 /* ── Página HTML principal ──────────────────────────────────────────────── */
 static const char INDEX_HTML[] =
@@ -40,9 +47,19 @@ static const char INDEX_HTML[] =
     "<meta name='viewport' content='width=device-width,initial-scale=1'>"
     "<title>ESP32 Monitor</title>"
     "<style>"
-    "body{font:15px system-ui;max-width:720px;margin:24px auto;padding:0 16px;"
-    "background:#0d1117;color:#e6edf3}"
-    "h1{font-size:1.4rem;margin:0 0 16px;color:#58a6ff}"
+    "body{font:15px system-ui;max-width:1000px;margin:30px auto;padding:0 18px;"
+    "background:radial-gradient(ellipse at 50% -20%,#172c49 0,#0a101b 48%,#080c13 100%);"
+    "color:#e8f0fc;min-height:100vh}"
+    "h1{font-size:1.65rem;margin:0 0 4px;color:#f1f6ff;letter-spacing:-.03em}"
+    ".hero{padding-right:70px;min-height:60px;margin-bottom:18px}"
+    ".eyebrow{font-size:.7rem;color:#78b8ff;text-transform:uppercase;letter-spacing:.18em;margin:0 0 4px}"
+    ".refresh-badge{position:fixed;z-index:5;top:12px;right:12px;left:auto;width:54px;height:54px;"
+    "display:grid;place-items:center;border:1px solid #29415d;border-radius:16px;"
+    "background:#101a29eF;box-shadow:0 8px 30px #0008;backdrop-filter:blur(8px)}"
+    ".refresh-badge svg{position:absolute;width:42px;height:42px;transform:rotate(-90deg)}"
+    ".ring-track,.ring-progress{fill:none;stroke-width:3.5}.ring-track{stroke:#24364b}"
+    ".ring-progress{stroke:#54d6c7;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:0;transition:stroke-dashoffset .5s}"
+    "#refresh-time{font:600 10px ui-monospace,monospace;color:#e8f0fc}"
     "h2{font-size:1rem;margin:0 0 8px;color:#79c0ff}"
     "section{background:#161b22;padding:14px 16px;border-radius:10px;margin:10px 0;"
     "border:1px solid #21262d}"
@@ -51,16 +68,28 @@ static const char INDEX_HTML[] =
     "border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6edf3}"
     "button{margin-top:10px;background:#238636;color:#fff;border-color:#2ea043}"
     "button:hover{background:#2ea043}"
-    ".grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}"
-    ".card{background:#0d1117;border-radius:8px;padding:10px 12px;border:1px solid #21262d}"
+    ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}"
+    ".card{background:#0b1420;border-radius:11px;padding:13px 14px;border:1px solid #1e3043;min-width:0}"
     ".lbl{font-size:.75rem;color:#8b949e;text-transform:uppercase;letter-spacing:.05em}"
     ".val{font-size:1.15rem;font-weight:600;margin-top:2px}"
+    ".moon-card{display:flex;align-items:center;gap:12px;min-height:82px}"
+    ".moon-card img{width:68px;height:68px;flex:0 0 68px;border-radius:50%;background:#03070c;"
+    "box-shadow:0 0 22px #79a9d455;border:1px solid #61778d;object-fit:cover}"
+    ".moon-title{font-size:1.05rem;font-weight:650}"
     ".ok{color:#3fb950}.warn{color:#d29922}.err{color:#f85149}"
     ".muted{color:#8b949e;font-size:.85rem}"
     "pre{white-space:pre-wrap;font-size:.8rem;color:#8b949e}"
     "#msg{margin-top:8px;font-size:.85rem}"
     "</style>"
-    "<h1>ESP32 Monitor</h1>"
+    "<div class='refresh-badge' aria-label='Sensor refresh countdown'><svg viewBox='0 0 40 40'>"
+    "<circle class='ring-track' cx='20' cy='20' r='16'/><circle id='refresh-ring' class='ring-progress' cx='20' cy='20' r='16'/></svg>"
+    "<span id='refresh-time'>--</span></div>"
+    "<header class='hero'><p class='eyebrow'>LIVE SENSOR STATION</p><h1>ESP32 Monitor</h1></header>"
+
+    "<section><div class='grid'>"
+    "<div class='card'><div class='lbl'>Hora local</div><div class='val' id='cv-clock'>--</div></div>"
+    "<div class='card'><div class='lbl'>IP address</div><div class='val' id='cv-ip'>--</div></div>"
+    "</div></section>"
 
     /* Tarjetas de sensores */
     "<section>"
@@ -70,12 +99,19 @@ static const char INDEX_HTML[] =
     "<div class='card'><div class='lbl'>Temperatura</div><div class='val' "
     "id='cv-temp'>--</div></div>"
     "<div class='card'><div class='lbl'>Humedad</div><div class='val' id='cv-hum'>--</div></div>"
-    "<div class='card'><div class='lbl'>GPS</div><div class='val' id='cv-gps'>--</div></div>"
-    "<div class='card'><div class='lbl'>Clima</div><div class='val' id='cv-wx'>--</div></div>"
+    "<div class='card'><div class='lbl'>Pressure</div><div class='val' id='cv-pressure'>--</div></div>"
+    "<div class='card'><div class='lbl'>Latitude</div><div class='val' id='cv-lat'>--</div></div>"
+    "<div class='card'><div class='lbl'>Longitude</div><div class='val' id='cv-lon'>--</div></div>"
+    "<div class='card'><div class='lbl'>Weather forecast</div><div class='val' id='cv-wx'>--</div></div>"
+    "<div class='card moon-card'><img id='moon-photo' alt='Current moon phase' src='/moon.bmp'>"
+    "<div><div class='lbl'>Lunar phase</div><div class='moon-title' id='cv-moon'>--</div>"
+    "<div class='muted' id='cv-moon-illum'>Moon illumination</div></div></div>"
     "<div class='card'><div class='lbl'>Ciclo / prox.</div><div class='val' "
     "id='cv-upd'>--</div></div>"
     "</div>"
     "</section>"
+
+    "<section><h2>System log</h2><pre id='cv-events'>Waiting for events...</pre></section>"
 
     /* Configuracion de ciclo */
     "<section>"
@@ -119,17 +155,27 @@ static const char INDEX_HTML[] =
     "try{"
     "const d=await(await fetch('/api/status',{cache:'no-store'})).json();"
     "const s=d.sensors,g=d.gps,w=d.weather,r=d.refresh;"
+    "set('cv-clock',d.local_time||'--');set('cv-ip',d.wifi.ip||'192.168.4.1');"
     "set('cv-bat', s.battery_v.toFixed(2)+' V',"
     "  s.battery_v>3.5?'ok':'warn');"
     "set('cv-temp',s.temperature_c!=null?s.temperature_c.toFixed(1)+' C':'--',"
     "  s.temperature_c!=null?'ok':'warn');"
     "set('cv-hum',s.humidity_percent!=null?s.humidity_percent.toFixed(0)+' %':'--',"
     "  s.humidity_percent!=null?'ok':'warn');"
-    "set('cv-gps',g.fix?(g.latitude.toFixed(4)+', '+g.longitude.toFixed(4)):'Buscando...',"
-    "  g.fix?'ok':'warn');"
-    "set('cv-wx',w.available?(w.summary+' '+w.current_temperature_c.toFixed(1)+'C'):'Sin datos',"
+    "set('cv-pressure',s.pressure_hpa!=null?s.pressure_hpa.toFixed(1)+' hPa':'Sensor unavailable',s.bmp280_valid?'ok':'muted');"
+    "set('cv-lat',g.fix?g.latitude.toFixed(5):'--',g.fix?'ok':'warn');"
+    "set('cv-lon',g.fix?g.longitude.toFixed(5):'--',g.fix?'ok':'warn');"
+    "set('cv-wx',w.available?(w.summary+' '+w.current_temperature_c.toFixed(1)+'C · '+w.minimum_temperature_c.toFixed(0)+'/'+w.maximum_temperature_c.toFixed(0)+'C · rain '+w.precipitation_probability+'%'):'Sin datos',"
     "  w.available?'ok':'muted');"
-    "const rem=r.remaining_seconds;"
+    "set('cv-moon',w.moon_phase!=null?moonName(w.moon_phase):'--');"
+    "set('cv-moon-illum',w.moon_illumination_percent!=null?w.moon_illumination_percent+'% illuminated':'Moon data unavailable','muted');"
+    "if(w.moon_phase!=null){const k=Math.floor(w.moon_phase*255),im=document.querySelector('#moon-photo');"
+    "if(im.dataset.phase!==String(k)){im.dataset.phase=String(k);im.src='/moon.bmp?v='+k;}}"
+    "document.querySelector('#cv-events').textContent=(d.events||[]).join('\\n')||'No events yet';"
+    "const rem=r.remaining_seconds;const iv=r.interval_seconds||1;"
+    "document.querySelector('#refresh-time').textContent=rem>=0?"
+    "(String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0')):'--:--';"
+    "document.querySelector('#refresh-ring').style.strokeDashoffset=String(100*(1-Math.max(0,Math.min(1,rem/iv))));"
     "set('cv-upd',r.interval_seconds+'s / '+(rem>=0?rem+'s restantes':'esperando'),"
     "  rem>=0?(rem/r.interval_seconds>0.3?'ok':'warn'):'muted');"
     "document.querySelector('#iv').value=r.interval_seconds;"
@@ -139,6 +185,9 @@ static const char INDEX_HTML[] =
     "const el=document.querySelector('#'+id);"
     "el.textContent=v; el.className='val '+(cls||'');"
     "}"
+    "function moonName(p){return p<.035||p>=.965?'New moon':p<.22?'Waxing crescent':"
+    "p<.28?'First quarter':p<.47?'Waxing gibbous':p<.53?'Full moon':p<.72?"
+    "'Waning gibbous':p<.78?'Last quarter':'Waning crescent';}"
     "setInterval(refresh,2000);refresh();"
 
     /* Cambiar intervalo */
@@ -175,6 +224,15 @@ static void add_number_or_null(cJSON *obj, const char *key, bool valid, double v
         cJSON_AddNullToObject(obj, key);
 }
 
+static void add_local_time(cJSON *obj) {
+    time_t epoch = time(NULL);
+    struct tm local = {0};
+    char value[32] = "TIME SYNCING";
+    if (epoch > 1700000000 && localtime_r(&epoch, &local))
+        strftime(value, sizeof(value), "%a %d %b %H:%M", &local);
+    cJSON_AddStringToObject(obj, "local_time", value);
+}
+
 static cJSON *weather_json(const monitor_data_t *data, uint32_t now_ms) {
     cJSON *w = cJSON_CreateObject();
     if (!w)
@@ -193,6 +251,9 @@ static cJSON *weather_json(const monitor_data_t *data, uint32_t now_ms) {
                        data->weather.maximum_temperature_c);
     add_number_or_null(w, "precipitation_probability", data->weather.valid,
                        data->weather.precipitation_probability);
+    add_number_or_null(w, "moon_phase", data->weather.moon_phase_valid, data->weather.moon_phase);
+    add_number_or_null(w, "moon_illumination_percent", data->weather.moon_phase_valid,
+                       data->weather.moon_illumination_percent);
     const uint32_t age =
         data->weather.valid ? (uint32_t)(now_ms - data->weather.updated_ms) / 1000 : 0;
     cJSON_AddNumberToObject(w, "age_seconds", age);
@@ -245,6 +306,25 @@ static esp_err_t index_handler(httpd_req_t *req) {
     return httpd_resp_sendstr(req, INDEX_HTML);
 }
 
+/* GET /moon.bmp — imagen pequeña, generada y almacenada en RAM por fase. */
+static esp_err_t moon_image_handler(httpd_req_t *req) {
+    monitor_data_t data;
+    monitor_state_snapshot(s_state, &data);
+    if (s_moon_image_mutex == NULL ||
+        xSemaphoreTake(s_moon_image_mutex, portMAX_DELAY) != pdTRUE) {
+        return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                                   "Moon image buffer unavailable");
+    }
+    moon_image_render_bmp(data.moon_phase_valid ? data.moon_phase : 0.0f,
+                          s_moon_image_buffer, sizeof(s_moon_image_buffer));
+    httpd_resp_set_type(req, "image/bmp");
+    httpd_resp_set_hdr(req, "Cache-Control", "private, max-age=3600");
+    const esp_err_t result = httpd_resp_send(req, (const char *)s_moon_image_buffer,
+                                             sizeof(s_moon_image_buffer));
+    xSemaphoreGive(s_moon_image_mutex);
+    return result;
+}
+
 /* GET /api/status — snapshot completo del monitor */
 static esp_err_t status_handler(httpd_req_t *req) {
     monitor_data_t data;
@@ -267,6 +347,11 @@ static esp_err_t status_handler(httpd_req_t *req) {
     cJSON_AddNumberToObject(sensors, "battery_v", data.battery_voltage);
     add_number_or_null(sensors, "temperature_c", data.dht_valid, data.temperature_c);
     add_number_or_null(sensors, "humidity_percent", data.dht_valid, data.humidity_percent);
+    add_number_or_null(sensors, "pressure_hpa", data.bmp280_valid, data.pressure_hpa);
+    cJSON_AddBoolToObject(sensors, "bmp280_valid", data.bmp280_valid);
+    add_number_or_null(sensors, "moon_phase", data.moon_phase_valid, data.moon_phase);
+    add_number_or_null(sensors, "moon_illumination_percent", data.moon_phase_valid,
+                       data.moon_illumination_percent);
     cJSON_AddBoolToObject(sensors, "dht_valid", data.dht_valid);
     cJSON_AddNumberToObject(sensors, "last_read_ms", data.last_sensor_read_ms);
 
@@ -291,6 +376,7 @@ static esp_err_t status_handler(httpd_req_t *req) {
 
     /* display mask */
     cJSON_AddNumberToObject(root, "display_mask", data.display_fields_mask);
+    add_local_time(root);
 
     /* weather */
     cJSON *w = weather_json(&data, now_ms);
@@ -299,6 +385,9 @@ static esp_err_t status_handler(httpd_req_t *req) {
         return send_json(req, NULL);
     }
     cJSON_AddItemToObject(root, "weather", w);
+    cJSON *events = cJSON_AddArrayToObject(root, "events");
+    for (uint8_t i = 0; events && i < data.event_log_count; ++i)
+        cJSON_AddItemToArray(events, cJSON_CreateString(data.event_log[i]));
 
     return send_json(req, root);
 }
@@ -315,12 +404,18 @@ static esp_err_t sensors_handler(httpd_req_t *req) {
     cJSON_AddNumberToObject(root, "battery_v", data.battery_voltage);
     add_number_or_null(root, "temperature_c", data.dht_valid, data.temperature_c);
     add_number_or_null(root, "humidity_percent", data.dht_valid, data.humidity_percent);
+    add_number_or_null(root, "pressure_hpa", data.bmp280_valid, data.pressure_hpa);
+    cJSON_AddBoolToObject(root, "bmp280_valid", data.bmp280_valid);
+    add_number_or_null(root, "moon_phase", data.moon_phase_valid, data.moon_phase);
+    add_number_or_null(root, "moon_illumination_percent", data.moon_phase_valid,
+                       data.moon_illumination_percent);
     cJSON_AddBoolToObject(root, "dht_valid", data.dht_valid);
     cJSON_AddBoolToObject(root, "gps_fix", data.gps_fix);
     add_number_or_null(root, "latitude", data.gps_fix, data.latitude);
     add_number_or_null(root, "longitude", data.gps_fix, data.longitude);
     cJSON_AddNumberToObject(root, "last_read_ms", data.last_sensor_read_ms);
     cJSON_AddNumberToObject(root, "interval_seconds", data.sensor_interval_seconds);
+    add_local_time(root);
     return send_json(req, root);
 }
 
@@ -451,6 +546,8 @@ static esp_err_t config_display_handler(httpd_req_t *req) {
     APPLY_BIT("dht", DISPLAY_FIELD_DHT);
     APPLY_BIT("gps", DISPLAY_FIELD_GPS);
     APPLY_BIT("weather", DISPLAY_FIELD_WEATHER);
+    APPLY_BIT("pressure", DISPLAY_FIELD_PRESSURE);
+    APPLY_BIT("moon", DISPLAY_FIELD_MOON);
 #undef APPLY_BIT
 
     cJSON_Delete(json);
@@ -463,6 +560,8 @@ static esp_err_t config_display_handler(httpd_req_t *req) {
     cJSON_AddBoolToObject(resp, "dht", (mask & DISPLAY_FIELD_DHT) != 0);
     cJSON_AddBoolToObject(resp, "gps", (mask & DISPLAY_FIELD_GPS) != 0);
     cJSON_AddBoolToObject(resp, "weather", (mask & DISPLAY_FIELD_WEATHER) != 0);
+    cJSON_AddBoolToObject(resp, "pressure", (mask & DISPLAY_FIELD_PRESSURE) != 0);
+    cJSON_AddBoolToObject(resp, "moon", (mask & DISPLAY_FIELD_MOON) != 0);
     ESP_LOGI(TAG, "Display mask actualizado a 0x%02x", mask);
     return send_json(req, resp);
 }
@@ -611,6 +710,7 @@ static esp_err_t start_web_server(void) {
     const httpd_uri_t routes[] = {
         /* Pagina principal */
         {"/", HTTP_GET, index_handler, NULL},
+        {"/moon.bmp", HTTP_GET, moon_image_handler, NULL},
         /* Datos */
         {"/api/status", HTTP_GET, status_handler, NULL},
         {"/api/sensors", HTTP_GET, sensors_handler, NULL},
@@ -638,6 +738,12 @@ static esp_err_t start_web_server(void) {
 /* ── Punto de entrada ────────────────────────────────────────────────────── */
 esp_err_t network_start(monitor_state_t *state) {
     s_state = state;
+    if (s_moon_image_mutex == NULL) {
+        s_moon_image_mutex = xSemaphoreCreateMutex();
+        if (s_moon_image_mutex == NULL) {
+            return ESP_ERR_NO_MEM;
+        }
+    }
 
     esp_err_t r = nvs_flash_init();
     if (r == ESP_ERR_NVS_NO_FREE_PAGES || r == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -722,11 +828,15 @@ esp_err_t network_start(monitor_state_t *state) {
     ESP_RETURN_ON_ERROR(esp_wifi_start(), TAG, "wifi start");
     ESP_RETURN_ON_ERROR(start_web_server(), TAG, "web server");
     ESP_RETURN_ON_ERROR(weather_start(state), TAG, "weather task");
+#ifndef CONFIG_MONITOR_WOKWI_SIMULATION
+    ESP_RETURN_ON_ERROR(ble_server_start(state), TAG, "BLE GATT server");
+#endif
 
 #ifdef CONFIG_MONITOR_WOKWI_SIMULATION
     ESP_LOGI(TAG, "Wokwi: STA Wokwi-GUEST | servidor en puerto 80");
 #else
     ESP_LOGI(TAG, "AP: %s / %s  |  http://192.168.4.1", PORTAL_SSID, PORTAL_AP_CODE);
+    monitor_state_log_event(state, "Setup AP ready");
 #endif
     return ESP_OK;
 }

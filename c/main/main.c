@@ -1,8 +1,10 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "config.h"
+#include "bmp280_bridge.h"
 #include "display.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
@@ -91,7 +93,7 @@ static esp_err_t configure_adc(adc_oneshot_unit_handle_t *adc, adc_cali_handle_t
         .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
     ESP_RETURN_ON_ERROR(adc_oneshot_config_channel(*adc, VOLTAGE_ADC_CHANNEL, &channel_config), TAG,
-                        "ADC GPIO34 configuration failed");
+                        "ADC GPIO4 configuration failed");
 
 #if ADC_CALI_SCHEME_LINE_FITTING_SUPPORTED
     const adc_cali_line_fitting_config_t cali_config = {
@@ -166,13 +168,20 @@ static void configure_gps(void) {
 /* ── Bucle principal ────────────────────────────────────────────────────── */
 
 void app_main(void) {
+    setenv("TZ", MONITOR_TIMEZONE, 1);
+    tzset();
     ESP_LOGI(TAG, "Iniciando monitor de bateria, sensores y GPS");
 
     monitor_state_t state;
     monitor_state_init(&state);
+    monitor_state_log_event(&state, "Booting firmware");
 
     display_t display;
     ESP_ERROR_CHECK(display_init(&display));
+
+    const bool bmp_ok = monitor_bmp280_init();
+    ESP_LOGI(TAG, "BMP280 %s", bmp_ok ? "detectado" : "no detectado (0x76/0x77)");
+    monitor_state_log_event(&state, bmp_ok ? "BMP280 detected" : "BMP280 unavailable");
 
     const gpio_config_t dht_config = {
         .pin_bit_mask = 1ULL << DHT_GPIO,
@@ -249,12 +258,18 @@ void app_main(void) {
 #endif
                 if (!dht_ok) {
                     ESP_LOGW(TAG, "No se pudo leer el DHT22");
+                    monitor_state_log_event(&state, "DHT22 unavailable");
+                } else {
+                    monitor_state_log_event(&state, "DHT22 read OK");
                 }
             }
 
             const float battery_voltage = read_battery_voltage(adc, adc_calibration);
             monitor_state_set_sensors(&state, battery_voltage, dht.temperature, dht.humidity,
                                       dht_ok, now_ms);
+            float pressure_hpa = 0.0f;
+            const bool pressure_ok = bmp_ok && monitor_bmp280_read(&pressure_hpa);
+            monitor_state_set_bmp280(&state, pressure_hpa, pressure_ok);
 
             if (ml_ready) {
                 if (dht_ok) {

@@ -44,16 +44,16 @@ This project was generated 100% by artificial intelligence to test mixed capabil
 
 ![A small brick figure watches telemetry screens while a robot programs in a dark workspace](docs/visuals/hero-esp32-telemetry.png)
 
-A multi-implementation ESP32 telemetry project for DHT22 temperature/humidity, NEO-6M GPS, battery voltage, a 170×320 color LCD, and a 128×64 OLED. The C, MicroPython, and Rust versions include a web API, Wi-Fi setup, and Open-Meteo forecasts. The Arduino version currently reads the sensors and renders the displays.
+A multi-implementation ESP32 telemetry project for DHT22 temperature/humidity, BMP280 pressure, NEO-6M GPS coordinates, battery voltage, local date/time, weather, and lunar phase. C, MicroPython, and Rust include an auto-refreshing web dashboard, HTTP API, Wi-Fi setup, Open-Meteo forecasts, and a BLE GATT service that serves the telemetry as JSON, text, YAML, or XML. Their large color LCD includes a shrinking circular refresh timer and a recent-event logger; the small OLED shows a compact sensor snapshot. Arduino currently covers its sensor and display path.
 
-The three full-featured versions share an API contract; C / ESP-IDF is the reference implementation. C and Rust use TensorFlow Lite Micro (TFLM) to exercise float32 inference on the classic ESP32 CPU and its FPU with the same published `hello_world` sine model. The ESP32 has an FPU, not a TPU; this is an inference integration check, not a TPU test, performance benchmark, or sensor forecast. Normalized DHT22 temperature and humidity are passed in separate inferences (or battery voltage when DHT22 is unavailable), and the outputs are logged. The standard MicroPython firmware does not include TFLM; its README documents the custom firmware needed to add it. Arduino currently covers the sensor and display path:
+The three full-featured versions share an API contract; C / ESP-IDF is the reference implementation. C and Rust use TensorFlow Lite Micro (TFLM) to exercise float32 inference on the ESP32-S3 CPU and its FPU with the same published `hello_world` sine model. The ESP32-S3 has an FPU, not a TPU; this is an inference integration check, not a TPU test, performance benchmark, or sensor forecast. Normalized DHT22 temperature and humidity are passed in separate inferences (or battery voltage when DHT22 is unavailable), and the outputs are logged. The standard MicroPython firmware does not include TFLM; its README documents the custom firmware needed to add it. Arduino currently covers the sensor and display path:
 
-| Directory | Stack | Web server | Weather |
-|-----------|-------|-----------|---------|
-| [`c/`](c/) | C / ESP-IDF 5.x | ✅ ESP HTTP server | ✅ HTTPS |
-| [`python/`](python/) | MicroPython | ✅ usocket | ✅ urequests |
-| [`rust/`](rust/) | Rust / esp-idf-svc (std) | ✅ EspHttpServer | ✅ HTTPS |
-| [`arduino/`](arduino/) | Arduino (C++) | — | — |
+| Directory | Stack | Web dashboard/API | BLE | Weather |
+|-----------|-------|-------------------|-----|---------|
+| [`c/`](c/) | C / ESP-IDF 5.x | ✅ ESP HTTP server | ✅ NimBLE GATT | ✅ HTTPS |
+| [`python/`](python/) | MicroPython | ✅ usocket | ✅ GATT | ✅ urequests |
+| [`rust/`](rust/) | Rust / esp-idf-svc (std) | ✅ EspHttpServer | ✅ NimBLE GATT | ✅ HTTPS |
+| [`arduino/`](arduino/) | Arduino (C++) | — | — | — |
 
 > **Source of truth:** the C / ESP-IDF implementation. Python and Rust aim to keep API behavior in parity with C. Arduino does not yet include networking or weather features.
 
@@ -64,6 +64,7 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
 - [Hardware](#hardware)
 - [Pin map](#pin-map)
 - [What it displays](#what-it-displays)
+  - [Web dashboard](#web-dashboard)
 - [HTTP API](#http-api)
   - [GET /api/status](#get-apistatus)
   - [GET /api/sensors](#get-apisensors)
@@ -71,6 +72,7 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
   - [POST /api/config/interval](#post-apiconfiginterval)
   - [POST /api/config/display](#post-apiconfigdisplay)
   - [POST /wifi](#post-wifi)
+- [Bluetooth Low Energy](#bluetooth-low-energy)
 - [curl examples](#curl-examples)
 - [Project structure](#project-structure)
 - [Documentation](#documentation)
@@ -86,12 +88,13 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
 
 ## Hardware
 
-- **Board:** ESP32 DevKit / WROOM-32 (Xtensa LX6 dual-core, 240 MHz)
+- **Board:** Dual USB-C ESP32-S3 development board with ESP32-S3-WROOM-1 N16R8 (16 MB flash, 8 MB octal PSRAM); GPIO map follows the ESP32-S3-DevKitC-1 reference
 - **LCD:** Waveshare 1.9" 170×320 ST7789V2, SPI
 - **OLED:** Generic 0.96" 128×64 SSD1306, I2C
 - **Temperature/Humidity:** DHT22
+- **Atmospheric pressure:** BMP280-3.3, I²C at 3.3 V (dedicated bus: SDA GPIO1, SCL GPIO2; addresses 0x76/0x77)
 - **GPS:** u-blox NEO-6M, UART 9600 baud
-- **Battery voltage:** 0–25 V module (5:1 divider) + external 12 kΩ/10 kΩ divider into ADC1 GPIO34
+- **Battery voltage:** 0–25 V module (5:1 divider) + external 12 kΩ/10 kΩ divider into ADC1 GPIO4 (ADC1_CH3)
 
 ### Wiring diagrams and display mockup
 
@@ -101,15 +104,15 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
 
 The ESP32 sits between two separate breadboard sections so the displays can connect on the left and the sensors on the right. Each five-hole strip connects horizontally; the power rails connect vertically. Numbered rows on opposite sections are isolated unless a jumper explicitly joins them. Insulated wires that pass over a rail connect only at their marked endpoint holes.
 
-The left section uses rows 3/5/39/34/32 for LCD SCK/MOSI/CS/DC/RST and rows 7/9 for OLED SCL/SDA. The right section uses row 51 for DHT22 DATA, rows 34/32 for GPS TX/RX, row 55 for the divided ADC output, and row 58 for the voltage module's raw S signal. The shown cross-section jumpers join rows 3, 5, 7, 9, 51, and 55 only. Place the 12 kΩ resistor between right-side rows 58 and 55, the 10 kΩ resistor between right-side row 55 and ground, and the DHT22 4.7 kΩ pull-up between right-side row 51 and 3V3.
+The board uses an ESP32-S3-WROOM-1 N16R8 module and has two USB-C connectors. Firmware targets the N16R8 configuration and follows the ESP32-S3-DevKitC-1 GPIO map; check the labels on the purchased board before wiring because dual-USB-C carrier-board layouts can differ. The left section carries the LCD (SCK/MOSI/CS/DC/RST on GPIO12/11/10/13/14) and OLED (SCL/SDA on GPIO9/8). The right section carries DHT22 DATA on GPIO6, GPS TX/RX on GPIO18/17, battery ADC on GPIO4, and BMP280 SDA/SCL on GPIO1/2. The BMP280 uses its own I²C controller. Keep GPIO19/20 reserved for native USB and do not use GPIO35–37, which are tied to octal flash/PSRAM on this module.
 
 #### Wiring overview
 
-![ESP32 wiring diagram](docs/visuals/diagrama-conexiones-esp32.png)
+![ESP32-S3 N16R8 dual-USB-C wiring diagram with BMP280 pressure sensor](docs/visuals/diagrama-conexiones-esp32.png)
 
 #### LCD and OLED preview
 
-![Expected LCD and OLED screens](docs/visuals/mockup-displays-esp32.png)
+![Expected LCD and OLED screens with local date/time, pressure, GPS coordinates, lunar phase, IP, countdown ring, and system log](docs/visuals/mockup-displays-esp32-v3.svg)
 
 ---
 
@@ -117,19 +120,22 @@ The left section uses rows 3/5/39/34/32 for LCD SCK/MOSI/CS/DC/RST and rows 7/9 
 
 | Module | Signal | ESP32 GPIO |
 |--------|--------|-----------|
-| LCD ST7789V2 | SCK | 18 |
-| LCD ST7789V2 | MOSI | 23 |
-| LCD ST7789V2 | CS | 13 |
-| LCD ST7789V2 | DC | 27 |
-| LCD ST7789V2 | RST | 26 |
+| LCD ST7789V2 | SCK | 12 |
+| LCD ST7789V2 | MOSI | 11 |
+| LCD ST7789V2 | CS | 10 |
+| LCD ST7789V2 | DC | 13 |
+| LCD ST7789V2 | RST | 14 |
 | LCD ST7789V2 | BL | 3V3 (hardwired) |
-| OLED SSD1306 | SDA | 21 |
-| OLED SSD1306 | SCL | 22 |
+| OLED SSD1306 | SDA | 8 |
+| OLED SSD1306 | SCL | 9 |
 | OLED SSD1306 | I2C address | 0x3C |
-| DHT22 | DATA | 33 |
-| GPS NEO-6M | TX → ESP RX | 16 |
+| BMP280-3.3 | SDA / SCL | 1 / 2 (I²C1, dedicated bus) |
+| BMP280-3.3 | I2C address | 0x76 or 0x77 |
+| BMP280-3.3 | VCC | 3V3 |
+| DHT22 | DATA | 6 |
+| GPS NEO-6M | TX → ESP RX | 18 |
 | GPS NEO-6M | RX ← ESP TX | 17 (optional) |
-| Battery ADC | Signal | 34 |
+| Battery ADC | Signal | 4 (ADC1_CH3) |
 
 ### Battery voltage divider
 
@@ -140,7 +146,7 @@ Battery → [0-25V module] → S pin
                                 ↓
                              12 kΩ
                                 ↓
-                           GPIO34 ──── ADC1
+                           GPIO4 ───── ADC1_CH3
                                 ↓
                              10 kΩ
                                 ↓
@@ -159,15 +165,14 @@ Both displays share the same layout and are updated every second.
 
 ```text
 ┌─────────────────────────────┐
-│ ESP32 MONITOR               │  ← title (blue)
-├─────────────────────────────┤
-│ WIFI MyNetwork  192.168.1.x │  ← green when connected
+│ TUE 10 NOV 13:54       ◎    │  ← clock + refresh ring in header
+│ IP 192.168.1.42      00:07 │  ← green on Wi-Fi, yellow on setup AP
 ├─────────────────────────────┤
 │ BAT  12.34V                 │  ← green >3.5V, yellow otherwise
 ├─────────────────────────────┤
 │ TEMP  24.1C    HUM  55%     │
 ├─────────────────────────────┤
-│ GPS  FIX  SAT 9             │
+│ GPS FIX                      │
 │ LAT  19.43260               │
 │ LON -99.13320               │
 ├─────────────────────────────┤
@@ -175,32 +180,42 @@ Both displays share the same layout and are updated every second.
 │ SOLEADO       22.5C         │
 │ MIN 15.0  MAX 28.0C         │
 │ LLUVIA 5%                   │
+│ PRESS 1013.2 hPa            │
+│ MOON WAX GIB 72%       (●)  │  ← phase icon follows forecast data
 ├─────────────────────────────┤
-│ UPDATE  10s   PROX 00:07    │  ← sensor cycle + countdown
-│        ◯ (animated ring)    │  ← green→yellow→red arc
+│ UPDATE  10s                  │  ← sensor cycle interval
+│ SYSTEM LOG                  │
+│ 12:00 Wi-Fi connected       │
+│ 12:01 BMP280 pressure read  │
 └─────────────────────────────┘
 ```
 
 ### OLED 128×64 (monochrome)
 
 ```text
-WIFI OK
-BAT 12.34V
-T 24.1C H 55%
+Tue 10 Nov 13:54
+IP 192.168.1.42
+T24 H55 BAT12.3
+P 1013.2 hPa
 LAT 19.4326
 LON -99.1332
-SOLEADO  22C
-15/28C P5%
+WX SUNNY 22C RAIN5%
 UPD 10s  00:07
 ```
 
 Both displays respect the `display_fields_mask` — individual sections can be hidden via the API without restarting.
 
+### Web dashboard
+
+![Preview of the ESP32 live telemetry dashboard with the compact refresh ring in the upper-right corner and a generated moon image](docs/visuals/mockup-web-dashboard.png)
+
+The C, Rust, and MicroPython pages refresh telemetry every two seconds. The small circular countdown stays fixed at the upper-right corner. On the large color LCD, the ring sits at the far right of the same top status band as date, time, and IP; the GPS area remains clear. The LCD also draws its own phase-shaped moon icon. The moon card on the web page uses a 64×64 grayscale BMP rendered from the current phase into a reusable image buffer and served at `GET /moon.bmp`; the page requests a new image when the phase changes.
+
 ---
 
 ## HTTP API
 
-All three server implementations (C, Python, Rust) expose identical endpoints returning the same JSON structure.
+All three server implementations (C, Python, Rust) expose the same endpoints and include pressure, BMP280 validity, moon phase and illumination, GPS coordinates, local time, and recent system events in their JSON responses.
 
 **Base URL:** `http://<device-ip>/`
 From the config AP: `http://192.168.4.1/`
@@ -208,6 +223,7 @@ From the config AP: `http://192.168.4.1/`
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/` | HTML dashboard (auto-refreshes every 2 s) |
+| GET | `/moon.bmp` | Current moon phase image generated from the reusable image buffer |
 | GET | `/api/status` | Full monitor snapshot |
 | GET | `/api/sensors` | Last sensor reading only |
 | GET | `/api/weather` | Weather forecast only |
@@ -232,6 +248,10 @@ curl http://<IP>/api/status
     "temperature_c": 24.1,
     "humidity_percent": 55.0,
     "dht_valid": true,
+    "pressure_hpa": 1013.2,
+    "bmp280_valid": true,
+    "moon_phase": 0.25,
+    "moon_illumination_percent": 50,
     "last_read_ms": 45000
   },
   "gps": {
@@ -250,7 +270,9 @@ curl http://<IP>/api/status
     "weather_interval_seconds": 300,
     "remaining_seconds": 7
   },
-  "display_mask": 15,
+  "display_mask": 63,
+  "events": ["Setup AP ready", "BMP280 pressure updated"],
+  "local_time": "Tue 10 Nov 13:54",
   "weather": {
     "available": true,
     "summary": "SOLEADO",
@@ -260,11 +282,21 @@ curl http://<IP>/api/status
     "minimum_temperature_c": 15.0,
     "maximum_temperature_c": 28.0,
     "precipitation_probability": 5,
+    "moon_phase": 0.25,
+    "moon_illumination_percent": 50,
     "age_seconds": 120,
     "stale": false
   }
 }
 ```
+
+---
+
+## Bluetooth Low Energy
+
+The C, MicroPython, and Rust firmware advertise as `ESP32-Monitor`. GATT service `0xFFA0` exposes four read-only characteristics: `0xFFA1` JSON, `0xFFA2` key/value text, `0xFFA3` YAML, and `0xFFA4` XML. A BLE central reads the characteristic for the format it needs. All formats share compact field names for local time, Wi-Fi/IP, battery, DHT22, BMP280, GPS, forecast, lunar phase, countdown, and the latest system event. Unavailable sensor data is represented as `null` (or an empty XML value). The HTTP API remains available at the same time.
+
+See [the BLE protocol reference](docs/ble.md) for UUIDs, data format details, and central-client behavior.
 
 ---
 
@@ -282,13 +314,18 @@ curl http://<IP>/api/sensors
   "temperature_c": 24.1,
   "humidity_percent": 55.0,
   "dht_valid": true,
+  "pressure_hpa": 1013.2,
+  "bmp280_valid": true,
+  "moon_phase": 0.25,
+  "moon_illumination_percent": 50,
   "gps_fix": true,
   "latitude": 19.4326,
   "longitude": -99.1332,
   "satellites": 9,
   "last_read_ms": 45000,
   "interval_seconds": 10,
-  "remaining_seconds": 7
+  "remaining_seconds": 7,
+  "local_time": "Tue 10 Nov 13:54"
 }
 ```
 
@@ -312,6 +349,8 @@ curl http://<IP>/api/weather
   "minimum_temperature_c": 14.0,
   "maximum_temperature_c": 21.0,
   "precipitation_probability": 80,
+  "moon_phase": 0.75,
+  "moon_illumination_percent": 50,
   "age_seconds": 45,
   "stale": false
 }
@@ -357,17 +396,17 @@ Show or hide individual sections on both LCD and OLED without rebooting. Omitted
 # Show all sections
 curl -X POST http://<IP>/api/config/display \
      -H "Content-Type: application/json" \
-     -d '{"battery": true, "dht": true, "gps": true, "weather": true}'
+     -d '{"battery": true, "dht": true, "gps": true, "weather": true, "pressure": true, "moon": true}'
 
 # Compact mode — battery and temperature only
 curl -X POST http://<IP>/api/config/display \
      -H "Content-Type: application/json" \
-     -d '{"battery": true, "dht": true, "gps": false, "weather": false}'
+     -d '{"battery": true, "dht": true, "gps": false, "weather": false, "pressure": false, "moon": false}'
 
 # Navigation mode — GPS only
 curl -X POST http://<IP>/api/config/display \
      -H "Content-Type: application/json" \
-     -d '{"battery": false, "dht": false, "gps": true, "weather": false}'
+     -d '{"battery": false, "dht": false, "gps": true, "weather": false, "pressure": false, "moon": false}'
 ```
 
 **Response:**
@@ -379,12 +418,14 @@ curl -X POST http://<IP>/api/config/display \
   "battery": true,
   "dht": true,
   "gps": false,
-  "weather": false
+  "weather": false,
+  "pressure": false,
+  "moon": false
 }
 ```
 
-> `display_mask` bitmask: bit 0 = battery, bit 1 = DHT22, bit 2 = GPS, bit 3 = weather.
-> `0x0F` (15) = all visible. `0x00` = all hidden.
+> `display_mask` bitmask: bit 0 = battery, bit 1 = DHT22, bit 2 = GPS, bit 3 = weather, bit 4 = pressure, bit 5 = moon phase.
+> `0x3F` (63) = all visible. `0x00` = all hidden.
 
 ---
 
@@ -480,10 +521,11 @@ curl -X POST http://<IP>/api/config/interval \
 ├── README.md            ← this file
 ├── README.template.md   ← ordered README section template
 ├── structure.md         ← README content and badge data
+├── .env.example         ← default Central Mexico POSIX timezone and offset
 ├── mkdocs.yml           ← documentation site navigation and plugins
 ├── API.md               ← full API reference with all curl examples
 ├── CHANGES.md           ← session change log
-├── docs/                ← MkDocs pages and approved hardware visuals
+├── docs/                ← MkDocs pages, BLE protocol reference, and visuals
 ├── supportfiles/
 │   ├── 3d/               ← OpenSCAD source, assembly/print STLs, preview
 │   └── cnc/              ← 2.8 mm acrylic profiles, GRBL files, preview
@@ -495,7 +537,7 @@ curl -X POST http://<IP>/api/config/interval \
 │   └── build_docs.sh       MkDocs + Python, C, and Rust API documentation
 │
 ├── components/
-│   └── tflm_demo/         ← shared ESP-IDF float32 model and C ABI for C and Rust
+│   └── tflm_demo/         ← TFLM float32 model, BMP280 bridge, pinned dependencies
 │       ├── ml_demo.cpp
 │       ├── include/ml_demo.h
 │       ├── hello_world_model_data.cc/h
@@ -509,6 +551,7 @@ curl -X POST http://<IP>/api/config/interval \
 │   │   ├── gps.c/h          NMEA parser (RMC + GGA), checksum validation
 │   │   ├── monitor_state.c/h  FreeRTOS mutex-protected shared state
 │   │   ├── network.c/h      Wi-Fi AP+STA, NVS credentials, HTTP server
+│   │   ├── ble_server.c/h   NimBLE GATT telemetry in four formats
 │   │   ├── weather.c/h      Open-Meteo HTTPS fetch task (cJSON)
 │   │   └── config.h         pin and ADC constants
 │   ├── scripts/
@@ -519,9 +562,10 @@ curl -X POST http://<IP>/api/config/interval \
 │   └── CMakeLists.txt
 │
 ├── python/              ← MicroPython
-│   ├── main.py              main loop, Wi-Fi, HTTP server, weather, display
+│   ├── main.py              main loop, Wi-Fi, HTTP dashboard/API, BLE, weather, display
 │   ├── config.py            all pin and timing constants
 │   ├── gps.py               NMEA parser (RMC + GGA)
+│   ├── bmp280.py            BMP280 calibration and pressure driver
 │   ├── ssd1306.py           SSD1306 I2C driver
 │   ├── st7789.py            ST7789V2 SPI driver
 │   └── scripts/
@@ -535,13 +579,17 @@ curl -X POST http://<IP>/api/config/interval \
 │   │   ├── monitor_state.rs Arc<Mutex<MonitorData>>, same API as C
 │   │   ├── display.rs       LCD + OLED render, same layout as C
 │   │   ├── network.rs       Wi-Fi AP+STA, NVS, HTTP server, all endpoints
+│   │   ├── ble.rs           NimBLE GATT service and four telemetry formats
 │   │   ├── weather.rs       Open-Meteo HTTPS fetch thread
 │   │   ├── gps.rs           NMEA parser (RMC + GGA)
+│   │   ├── bmp280.rs        register-level BMP280 driver on I2C1 GPIO1/2
 │   │   └── ml_demo.rs       FFI calls to the shared TFLM component
-│   ├── .cargo/config.toml   target: xtensa-esp32-espidf (std)
+│   ├── .cargo/config.toml   target: xtensa-esp32s3-espidf (std)
 │   ├── build.rs             embuild ESP-IDF bindings
 │   ├── Cargo.toml           esp-idf-svc, mipidsi, ssd1306, embedded-graphics
 │   ├── Cargo.lock           locked Rust crate versions
+│   ├── sdkconfig.defaults   NimBLE peripheral and GATT server settings
+│   ├── vendor/esp-idf-svc/  small IDF 5.4 NimBLE flag type compatibility patch
 │   ├── components_esp32.lock  locked ESP-IDF component versions
 │   ├── rust-toolchain.toml  channel = "esp" (espup)
 │   └── scripts/
@@ -670,7 +718,7 @@ cd rust/
 
 # Compile — no board needed
 ./scripts/build.sh
-# → firmware.bin  and  target/xtensa-esp32-espidf/release/esp32-monitor-rust
+# → firmware.bin  and  target/xtensa-esp32s3-espidf/release/esp32-monitor-rust
 
 # Flash + monitor (board must be connected)
 ./scripts/deploy.sh
@@ -679,7 +727,7 @@ cd rust/
 ESP32_PORT=/dev/cu.usbserial-0001 ./scripts/deploy.sh
 ```
 
-The target is `xtensa-esp32-espidf` (std, ESP-IDF bindings via `esp-idf-sys`). ESP-IDF version is pinned to `v5.4.2` in `.cargo/config.toml` and managed automatically by `embuild`.
+The target is `xtensa-esp32s3-espidf` (std, ESP-IDF bindings via `esp-idf-sys`). ESP-IDF version is pinned to `v5.4.2` in `.cargo/config.toml` and managed automatically by `embuild`.
 
 ---
 
@@ -759,6 +807,9 @@ curl -X POST http://localhost:8180/api/config/interval \
 - **NTP:** the C and Rust implementations use `pool.ntp.org`; Python uses MicroPython's built-in `ntptime`. Required for TLS certificate validation.
 - **ADC calibration:** each board varies. Measure with a multimeter and adjust `VOLTAGE_CALIBRATION` in the respective config file.
 - **OLED address:** default `0x3C`. Some modules use `0x3D` — change `OLED_I2C_ADDRESS` in config.
+- **Clock zone:** copy `.env.example` to `.env` before building. `MONITOR_TZ` configures C/Rust; `MONITOR_TZ_OFFSET_HOURS` configures MicroPython. The default is Central Mexico (UTC−6). NTP sync sets the clock; screens show `TIME SYNCING` until then.
+- **BMP280:** connect the 3.3 V module to GPIO1 (SDA) and GPIO2 (SCL) on its dedicated I²C bus. Both addresses, `0x76` and `0x77`, are scanned. If the module is absent, the firmware continues and reports pressure as `null` with `bmp280_valid: false`.
+- **Moon phase:** the forecast request uses the current GPS coordinates and includes Open-Meteo's daily `moon_phase`; the API reports the normalized phase (`0` new moon, `0.5` full moon) and calculated illumination percentage.
 
 ## License
 

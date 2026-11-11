@@ -3,6 +3,7 @@
 # ═══════════════════════════════════════════════════════════════
 
 # ── Build artefacts (all toolchains) ──────────────────────────
+.env
 build/
 build-wokwi/
 dist/
@@ -48,6 +49,7 @@ rust/export-esp.sh
 rust/firmware.bin
 rust/target/
 rust/.embuild/
+rust/.build-tools/
 
 # ── Python / MicroPython ──────────────────────────────────────
 .venv/
@@ -127,6 +129,10 @@ docs/visuals/*
 !docs/visuals/mockup-displays-esp32.png
 !docs/visuals/diagrama-conexiones-esp32-protoboard.png
 !docs/visuals/hero-esp32-telemetry.png
+!docs/visuals/mockup-displays-esp32-v3.svg
+!docs/visuals/mockup-displays-esp32-v3.png
+!docs/visuals/mockup-web-dashboard.svg
+!docs/visuals/mockup-web-dashboard.png
 
 # ── pre-commit cache ──────────────────────────────────────────
 .pre-commit-cache/

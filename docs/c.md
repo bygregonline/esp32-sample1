@@ -1,6 +1,6 @@
 # C / ESP-IDF
 
-The C implementation is the reference firmware. It uses ESP-IDF 5.x, FreeRTOS, and the ESP HTTP server. Its GPIO map lives in `c/main/config.h`.
+The C implementation is the reference firmware for a dual-USB-C ESP32-S3 N16R8 development board. GPIO assignments follow the ESP32-S3-DevKitC-1 reference; verify the printed pin labels on the purchased carrier board. It uses ESP-IDF 5.x, FreeRTOS, the ESP HTTP server, and NimBLE. The root page is a dashboard that refreshes the status API every two seconds; the GATT server exposes JSON, text, YAML, and XML snapshots. Its GPIO map lives in `c/main/config.h`; BMP280 support uses the pinned `esp-idf-lib/bmp280` component on I²C1 (GPIO1/2).
 
 ```sh
 cd c

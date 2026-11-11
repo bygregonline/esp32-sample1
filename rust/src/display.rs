@@ -3,18 +3,79 @@
 
 use core::fmt::Write as FmtWrite;
 use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, MonoTextStyle},
+    mono_font::{
+        ascii::{FONT_5X8, FONT_6X10},
+        MonoTextStyle,
+    },
     pixelcolor::{BinaryColor, Rgb565},
-    prelude::{DrawTarget, Point, RgbColor},
-    primitives::{Line, Primitive, PrimitiveStyle},
+    prelude::{DrawTarget, Pixel, Point, RgbColor},
+    primitives::{Circle, Line, Primitive, PrimitiveStyle},
     text::{Baseline, Text},
     Drawable,
 };
 use heapless::String;
 
 use crate::monitor_state::{
-    MonitorData, DISPLAY_FIELD_BATTERY, DISPLAY_FIELD_DHT, DISPLAY_FIELD_GPS, DISPLAY_FIELD_WEATHER,
+    MonitorData, DISPLAY_FIELD_BATTERY, DISPLAY_FIELD_DHT, DISPLAY_FIELD_GPS, DISPLAY_FIELD_MOON,
+    DISPLAY_FIELD_PRESSURE, DISPLAY_FIELD_WEATHER,
 };
+
+#[repr(C)]
+struct Tm {
+    sec: i32,
+    min: i32,
+    hour: i32,
+    mday: i32,
+    mon: i32,
+    year: i32,
+    wday: i32,
+    yday: i32,
+    isdst: i32,
+    gmtoff: i32,
+    zone: *const i8,
+}
+unsafe extern "C" {
+    fn time(out: *mut i64) -> i64;
+    fn localtime_r(t: *const i64, out: *mut Tm) -> *mut Tm;
+}
+pub(crate) fn clock_text() -> String<24> {
+    let mut out = String::new();
+    let mut epoch = 0i64;
+    let mut tm = Tm {
+        sec: 0,
+        min: 0,
+        hour: 0,
+        mday: 0,
+        mon: 0,
+        year: 0,
+        wday: 0,
+        yday: 0,
+        isdst: 0,
+        gmtoff: 0,
+        zone: core::ptr::null(),
+    };
+    unsafe {
+        time(&mut epoch);
+        if epoch > 1_700_000_000 && !localtime_r(&epoch, &mut tm).is_null() {
+            let days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            let months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+            ];
+            let _ = write!(
+                out,
+                "{} {:02} {} {:02}:{:02}",
+                days[tm.wday.clamp(0, 6) as usize],
+                tm.mday,
+                months[tm.mon.clamp(0, 11) as usize],
+                tm.hour,
+                tm.min
+            );
+        } else {
+            let _ = write!(out, "TIME SYNCING");
+        }
+    }
+    out
+}
 
 // ── Colores ────────────────────────────────────────────────────────────────
 const C_TITLE: Rgb565 = Rgb565::new(10, 27, 28); // azul claro
@@ -25,6 +86,102 @@ const C_WARN: Rgb565 = Rgb565::new(31, 23, 0); // amarillo
 const C_DIM: Rgb565 = Rgb565::new(5, 7, 8); // gris oscuro
 const C_WEATHER: Rgb565 = Rgb565::new(31, 18, 0); // naranja
 
+fn moon_phase_name(phase: f32, valid: bool) -> &'static str {
+    if !valid {
+        "--"
+    } else if !(0.035..0.965).contains(&phase) {
+        "NEW"
+    } else if phase < 0.22 {
+        "WAX CRES"
+    } else if phase < 0.28 {
+        "FIRST Q"
+    } else if phase < 0.47 {
+        "WAX GIB"
+    } else if phase < 0.53 {
+        "FULL"
+    } else if phase < 0.72 {
+        "WAN GIB"
+    } else if phase < 0.78 {
+        "LAST Q"
+    } else {
+        "WAN CRES"
+    }
+}
+
+fn draw_countdown_ring<D>(display: &mut D, remaining: i32, interval: u32)
+where
+    D: DrawTarget<Color = Rgb565>,
+{
+    let cx = 149;
+    let cy = 23;
+    let radius = 20.0f32;
+    let ratio = if remaining < 0 || interval == 0 {
+        0.0
+    } else {
+        (remaining as f32 / interval as f32).min(1.0)
+    };
+    let arc_color = if ratio > 0.5 {
+        C_OK
+    } else if ratio > 0.2 {
+        C_WARN
+    } else {
+        Rgb565::new(31, 8, 8)
+    };
+    let _ = Circle::new(Point::new(cx - 20, cy - 20), 41)
+        .into_styled(PrimitiveStyle::with_stroke(C_DIM, 3))
+        .draw(display);
+    let steps = (120.0 * ratio).ceil() as i32;
+    for step in 0..steps {
+        let a0 = -core::f32::consts::FRAC_PI_2 + (step as f32) * core::f32::consts::TAU / 120.0;
+        let a1 =
+            -core::f32::consts::FRAC_PI_2 + ((step + 1) as f32) * core::f32::consts::TAU / 120.0;
+        let p0 = Point::new(
+            cx + (radius * a0.cos()) as i32,
+            cy + (radius * a0.sin()) as i32,
+        );
+        let p1 = Point::new(
+            cx + (radius * a1.cos()) as i32,
+            cy + (radius * a1.sin()) as i32,
+        );
+        let _ = Line::new(p0, p1)
+            .into_styled(PrimitiveStyle::with_stroke(arc_color, 3))
+            .draw(display);
+    }
+}
+
+fn draw_moon_icon<D>(display: &mut D, phase: f32, valid: bool)
+where
+    D: DrawTarget<Color = Rgb565>,
+{
+    let radius = 10;
+    let center_x = 151;
+    let center_y = 171;
+    let angle = (if valid { phase } else { 0.0 }) * core::f32::consts::TAU;
+    let (sun_x, sun_z) = (angle.sin(), -angle.cos());
+    let mut row = [Pixel(Point::new(0, 0), Rgb565::BLACK); 21];
+    for dy in -radius..=radius {
+        for dx in -radius..=radius {
+            let nx = dx as f32 / radius as f32;
+            let ny = dy as f32 / radius as f32;
+            let r2 = nx * nx + ny * ny;
+            let color = if r2 <= 1.0 {
+                let nz = (1.0 - r2).sqrt();
+                let light = nx * sun_x + nz * sun_z;
+                if light > 0.0 {
+                    let shade = (175.0 + nz * 65.0) as u8;
+                    Rgb565::new(shade >> 3, shade >> 2, (shade + 5) >> 3)
+                } else {
+                    Rgb565::new(2, 3, 5)
+                }
+            } else {
+                Rgb565::BLACK
+            };
+            row[(dx + radius) as usize] = Pixel(Point::new(center_x + dx, center_y + dy), color);
+        }
+        let _ = display.draw_iter(row);
+    }
+}
+
 // ── LCD render ────────────────────────────────────────────────────────────
 pub fn render_lcd<D>(display: &mut D, data: &MonitorData, _now_us: i64, remaining: i32)
 where
@@ -34,21 +191,16 @@ where
     let mask = data.display_mask;
 
     // Título
-    lcd_text(display, "ESP32 MONITOR", 4, 4, C_TITLE);
-    lcd_hline(display, 14, C_DIM);
+    let clock = clock_text();
+    lcd_text(display, clock.as_str(), 4, 4, C_TITLE);
 
-    // Wi-Fi
+    // Keep date and IP together in the top status band.
     if data.wifi_connected {
-        let mut s: String<64> = String::new();
-        let _ = write!(
-            s,
-            "WIFI {}  {}",
-            &data.wifi_ssid[..data.wifi_ssid.len().min(12)],
-            data.ip_address
-        );
+        let mut s: String<24> = String::new();
+        let _ = write!(s, "IP {}", data.ip_address);
         lcd_text(display, s.as_str(), 4, 20, C_OK);
     } else {
-        lcd_text(display, "WIFI SIN CONEXION  AP:192.168.4.1", 4, 20, C_WARN);
+        lcd_text(display, "IP 192.168.4.1", 4, 20, C_WARN);
     }
 
     // Batería
@@ -69,6 +221,14 @@ where
         );
     }
     lcd_hline(display, 46, C_DIM);
+    draw_countdown_ring(display, remaining, data.sensor_interval_secs);
+    let mut countdown: String<8> = String::new();
+    if remaining >= 0 {
+        let _ = write!(countdown, "{:02}:{:02}", remaining / 60, remaining % 60);
+    } else {
+        let _ = write!(countdown, "--:--");
+    }
+    lcd_text(display, countdown.as_str(), 134, 18, C_VALUE);
 
     // Temperatura / Humedad
     if mask & DISPLAY_FIELD_DHT != 0 {
@@ -92,12 +252,7 @@ where
         lcd_text(display, "GPS", 4, 68, C_LABEL);
         if data.gps_fix {
             let mut s: String<24> = String::new();
-            let sats = if data.gps_has_satellites {
-                data.satellites
-            } else {
-                0
-            };
-            let _ = write!(s, "FIX  SAT {}", sats);
+            let _ = write!(s, "GPS FIX");
             lcd_text(display, s.as_str(), 28, 68, C_OK);
             let mut lat: String<24> = String::new();
             let mut lon: String<24> = String::new();
@@ -147,22 +302,41 @@ where
         }
     }
     lcd_hline(display, 158, C_DIM);
+    if mask & DISPLAY_FIELD_PRESSURE != 0 {
+        let mut p: String<24> = String::new();
+        if data.bmp280_valid {
+            let _ = write!(p, "PRESS {:.1} hPa", data.pressure_hpa);
+        } else {
+            let _ = write!(p, "PRESS -- hPa");
+        }
+        lcd_text(
+            display,
+            p.as_str(),
+            4,
+            160,
+            if data.bmp280_valid { C_OK } else { C_DIM },
+        );
+    }
+    if mask & DISPLAY_FIELD_MOON != 0 {
+        let phase = moon_phase_name(data.moon_phase, data.moon_phase_valid);
+        let mut m: String<32> = String::new();
+        let _ = write!(m, "MOON {} {}%", phase, data.moon_illumination_percent);
+        lcd_text(display, m.as_str(), 4, 172, C_WEATHER);
+        draw_moon_icon(display, data.moon_phase, data.moon_phase_valid);
+    }
+    lcd_hline(display, 184, C_DIM);
 
     // UPDATE + countdown
-    lcd_text(display, "UPDATE", 4, 164, C_LABEL);
+    lcd_text(display, "UPDATE", 4, 188, C_LABEL);
     let mut iv: String<16> = String::new();
     let _ = write!(iv, "{}s", data.sensor_interval_secs);
-    lcd_text(display, iv.as_str(), 52, 164, C_VALUE);
+    lcd_text(display, iv.as_str(), 52, 188, C_VALUE);
 
-    let rem = remaining.max(0) as u32;
-    let mut cd: String<16> = String::new();
-    let _ = write!(cd, "PROX {:02}:{:02}", rem / 60, rem % 60);
-    let rem_color = if remaining >= 0 && rem > data.sensor_interval_secs / 3 {
-        C_OK
-    } else {
-        C_WARN
-    };
-    lcd_text(display, cd.as_str(), 76, 164, rem_color);
+    lcd_hline(display, 216, C_DIM);
+    lcd_text(display, "SYSTEM LOG", 4, 220, C_LABEL);
+    for (i, event) in data.events.iter().rev().take(2).enumerate() {
+        lcd_text(display, event, 4, 232 + (i as i32) * 12, C_VALUE);
+    }
 }
 
 // ── OLED render ───────────────────────────────────────────────────────────
@@ -171,79 +345,66 @@ where
     D: DrawTarget<Color = BinaryColor>,
 {
     let _ = display.clear(BinaryColor::Off);
-    let mask = data.display_mask;
-
-    // Línea 0: título + wifi
-    oled_text(
-        display,
-        if data.wifi_connected {
-            "WIFI OK"
+    let clock = clock_text();
+    oled_text(display, clock.as_str(), 0);
+    let mut ip: String<24> = String::new();
+    let _ = write!(
+        ip,
+        "IP {}",
+        if data.ip_address.is_empty() {
+            "192.168.4.1"
         } else {
-            "WIFI CONFIG"
-        },
-        0,
+            &data.ip_address
+        }
     );
-
-    // Línea 1: batería
-    if mask & DISPLAY_FIELD_BATTERY != 0 {
-        let mut s: String<24> = String::new();
-        let _ = write!(s, "BAT {:.2}V", data.battery_voltage);
-        oled_text(display, s.as_str(), 10);
-    }
-
-    // Línea 2: DHT22
-    if mask & DISPLAY_FIELD_DHT != 0 {
-        let mut s: String<32> = String::new();
+    oled_text(display, ip.as_str(), 8);
+    if data.display_mask & DISPLAY_FIELD_DHT != 0 {
+        let mut dht: String<24> = String::new();
         if data.dht_valid {
             let _ = write!(
-                s,
-                "T {:.1}C H {:.0}%",
-                data.temperature_c, data.humidity_percent
+                dht,
+                "T{:.0} H{:.0} BAT{:.1}",
+                data.temperature_c, data.humidity_percent, data.battery_voltage
             );
         } else {
-            let _ = s.push_str("DHT22 SIN DATOS");
+            let _ = write!(dht, "DHT -- BAT{:.1}", data.battery_voltage);
         }
-        oled_text(display, s.as_str(), 20);
+        oled_text(display, dht.as_str(), 16);
     }
-
-    // Líneas 3-4: GPS
-    if mask & DISPLAY_FIELD_GPS != 0 {
+    if data.display_mask & DISPLAY_FIELD_PRESSURE != 0 {
+        let mut p: String<24> = String::new();
+        if data.bmp280_valid {
+            let _ = write!(p, "PRESS {:.1} hPa", data.pressure_hpa);
+        } else {
+            let _ = write!(p, "PRESS -- hPa");
+        }
+        oled_text(display, p.as_str(), 24);
+    }
+    if data.display_mask & DISPLAY_FIELD_GPS != 0 {
         if data.gps_fix {
             let mut lat: String<24> = String::new();
             let mut lon: String<24> = String::new();
             let _ = write!(lat, "LAT {:.4}", data.latitude);
             let _ = write!(lon, "LON {:.4}", data.longitude);
-            oled_text(display, lat.as_str(), 30);
+            oled_text(display, lat.as_str(), 32);
             oled_text(display, lon.as_str(), 40);
         } else {
-            oled_text(display, "GPS BUSCANDO", 30);
+            oled_text(display, "GPS SEARCHING", 32);
             oled_text(display, "LAT/LON --", 40);
         }
     }
-
-    // Líneas 5-6: Clima
-    if mask & DISPLAY_FIELD_WEATHER != 0 {
-        let w = &data.weather;
-        if w.valid {
-            let mut s: String<24> = String::new();
-            let _ = write!(s, "{:.8} {:.0}C", w.summary, w.current_temperature_c);
-            oled_text(
-                display,
-                s.as_str(),
-                30 + if mask & DISPLAY_FIELD_GPS != 0 { 16 } else { 0 },
-            );
-            let mut mm: String<24> = String::new();
+    if data.display_mask & DISPLAY_FIELD_WEATHER != 0 {
+        let mut wx: String<24> = String::new();
+        if data.weather.valid {
             let _ = write!(
-                mm,
-                "{:.0}/{:.0}C P{}%",
-                w.minimum_temperature_c, w.maximum_temperature_c, w.precipitation_probability
+                wx,
+                "WX {:.8} {:.0}C",
+                data.weather.summary, data.weather.current_temperature_c
             );
-            oled_text(
-                display,
-                mm.as_str(),
-                40 + if mask & DISPLAY_FIELD_GPS != 0 { 16 } else { 0 },
-            );
+        } else {
+            let _ = write!(wx, "WEATHER WAITING");
         }
+        oled_text(display, wx.as_str(), 48);
     }
 
     // Línea 7: UPDATE + countdown
@@ -256,7 +417,7 @@ where
         rem / 60,
         rem % 60
     );
-    oled_text(display, s.as_str(), 54);
+    oled_text(display, s.as_str(), 56);
 }
 
 // ── Primitivas ────────────────────────────────────────────────────────────
@@ -282,6 +443,6 @@ pub fn oled_text<D>(display: &mut D, text: &str, y: i32)
 where
     D: DrawTarget<Color = BinaryColor>,
 {
-    let style = MonoTextStyle::new(&FONT_6X10, BinaryColor::On);
+    let style = MonoTextStyle::new(&FONT_5X8, BinaryColor::On);
     let _ = Text::with_baseline(text, Point::new(0, y), style, Baseline::Top).draw(display);
 }
