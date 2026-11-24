@@ -42,12 +42,14 @@ void monitor_state_set_bmp280(monitor_state_t *state, float pressure_hpa, bool v
     xSemaphoreTake(state->mutex, portMAX_DELAY);
     state->data.pressure_hpa = pressure_hpa;
     state->data.bmp280_valid = valid;
-    if (valid) append_event_locked(&state->data, "BMP280 pressure updated");
+    if (valid)
+        append_event_locked(&state->data, "BMP280 pressure updated");
     xSemaphoreGive(state->mutex);
 }
 
 void monitor_state_log_event(monitor_state_t *state, const char *message) {
-    if (!state || !message) return;
+    if (!state || !message)
+        return;
     xSemaphoreTake(state->mutex, portMAX_DELAY);
     append_event_locked(&state->data, message);
     xSemaphoreGive(state->mutex);
@@ -56,15 +58,15 @@ void monitor_state_log_event(monitor_state_t *state, const char *message) {
 void monitor_state_set_moon(monitor_state_t *state, float phase, int illumination_percent,
                             bool valid) {
     xSemaphoreTake(state->mutex, portMAX_DELAY);
-    state->data.moon_phase = phase;
+    state->data.moon_phase                = phase;
     state->data.moon_illumination_percent = illumination_percent;
-    state->data.moon_phase_valid = valid;
+    state->data.moon_phase_valid          = valid;
     xSemaphoreGive(state->mutex);
 }
 
 void monitor_state_set_gps(monitor_state_t *state, const gps_state_t *gps, uint32_t now_ms) {
     xSemaphoreTake(state->mutex, portMAX_DELAY);
-    const bool had_fix = state->data.gps_fix;
+    const bool had_fix             = state->data.gps_fix;
     state->data.gps_fix            = gps_has_recent_fix(gps, now_ms);
     state->data.latitude           = gps->latitude;
     state->data.longitude          = gps->longitude;
@@ -80,7 +82,7 @@ void monitor_state_set_gps(monitor_state_t *state, const gps_state_t *gps, uint3
 void monitor_state_set_wifi(monitor_state_t *state, bool connected, const char *ssid,
                             const char *ip_address) {
     xSemaphoreTake(state->mutex, portMAX_DELAY);
-    const bool was_connected = state->data.wifi_connected;
+    const bool was_connected   = state->data.wifi_connected;
     state->data.wifi_connected = connected;
     snprintf(state->data.wifi_ssid, sizeof(state->data.wifi_ssid), "%s", ssid != NULL ? ssid : "");
     snprintf(state->data.ip_address, sizeof(state->data.ip_address), "%s",
@@ -88,7 +90,8 @@ void monitor_state_set_wifi(monitor_state_t *state, bool connected, const char *
     if (connected != was_connected) {
         char message[32];
         if (connected)
-            snprintf(message, sizeof(message), "Wi-Fi connected %.15s", ip_address != NULL ? ip_address : "");
+            snprintf(message, sizeof(message), "Wi-Fi connected %.15s",
+                     ip_address != NULL ? ip_address : "");
         else
             snprintf(message, sizeof(message), "Wi-Fi disconnected");
         append_event_locked(&state->data, message);
@@ -98,11 +101,12 @@ void monitor_state_set_wifi(monitor_state_t *state, bool connected, const char *
 
 void monitor_state_set_weather(monitor_state_t *state, const weather_data_t *weather) {
     xSemaphoreTake(state->mutex, portMAX_DELAY);
-    state->data.weather = *weather;
-    state->data.moon_phase = weather->moon_phase;
+    state->data.weather                   = *weather;
+    state->data.moon_phase                = weather->moon_phase;
     state->data.moon_illumination_percent = weather->moon_illumination_percent;
-    state->data.moon_phase_valid = weather->moon_phase_valid;
-    if (weather->valid) append_event_locked(&state->data, "Weather updated");
+    state->data.moon_phase_valid          = weather->moon_phase_valid;
+    if (weather->valid)
+        append_event_locked(&state->data, "Weather updated");
     xSemaphoreGive(state->mutex);
 }
 

@@ -3,8 +3,8 @@
 #include <string.h>
 #include <time.h>
 
-#include "config.h"
 #include "bmp280_bridge.h"
+#include "config.h"
 #include "display.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
@@ -30,7 +30,7 @@ typedef struct {
     float humidity;
 } dht_reading_t;
 
-/* ── DHT22 bit-bang ─────────────────────────────────────────────────────── */
+/* ── DHT11 bit-bang ─────────────────────────────────────────────────────── */
 
 static bool wait_level(int level, int64_t timeout_us) {
     const int64_t start = esp_timer_get_time();
@@ -45,7 +45,11 @@ static bool wait_level(int level, int64_t timeout_us) {
 static esp_err_t dht_read(dht_reading_t *reading) {
     gpio_set_direction(DHT_GPIO, GPIO_MODE_OUTPUT_OD);
     gpio_set_level(DHT_GPIO, 0);
+#ifdef CONFIG_MONITOR_WOKWI_SIMULATION
     esp_rom_delay_us(1200);
+#else
+    esp_rom_delay_us(18000);
+#endif
     gpio_set_level(DHT_GPIO, 1);
     esp_rom_delay_us(30);
     gpio_set_direction(DHT_GPIO, GPIO_MODE_INPUT_OUTPUT_OD);
@@ -73,6 +77,8 @@ static esp_err_t dht_read(dht_reading_t *reading) {
     if ((uint8_t)(bytes[0] + bytes[1] + bytes[2] + bytes[3]) != bytes[4]) {
         return ESP_ERR_INVALID_CRC;
     }
+#ifdef CONFIG_MONITOR_WOKWI_SIMULATION
+    /* Wokwi provides a DHT22 component, so decode its wire format here. */
     const uint16_t humidity_raw    = (uint16_t)((bytes[0] << 8) | bytes[1]);
     const uint16_t temperature_raw = (uint16_t)(((bytes[2] & 0x7f) << 8) | bytes[3]);
     reading->humidity              = humidity_raw / 10.0f;
@@ -80,6 +86,13 @@ static esp_err_t dht_read(dht_reading_t *reading) {
     if ((bytes[2] & 0x80) != 0) {
         reading->temperature = -reading->temperature;
     }
+#else
+    reading->humidity    = (float)bytes[0];
+    reading->temperature = (float)(bytes[2] & 0x7f);
+    if ((bytes[2] & 0x80) != 0) {
+        reading->temperature = -reading->temperature;
+    }
+#endif
     return ESP_OK;
 }
 
@@ -135,14 +148,16 @@ static float read_battery_voltage(adc_oneshot_unit_handle_t adc, adc_cali_handle
 }
 
 static void log_tflm_prediction(const char *input_source, float input_fraction) {
-    if (input_fraction < 0.0f) input_fraction = 0.0f;
-    if (input_fraction > 1.0f) input_fraction = 1.0f;
+    if (input_fraction < 0.0f)
+        input_fraction = 0.0f;
+    if (input_fraction > 1.0f)
+        input_fraction = 1.0f;
 
     const float model_input = input_fraction * 6.28318530718f;
-    float prediction = 0.0f;
+    float prediction        = 0.0f;
     if (ml_demo_infer(model_input, &prediction)) {
-        ESP_LOGI(TAG, "TFLM demo | input: %s -> %.3f rad | predicted sin(x): %.3f",
-                 input_source, model_input, prediction);
+        ESP_LOGI(TAG, "TFLM demo | input: %s -> %.3f rad | predicted sin(x): %.3f", input_source,
+                 model_input, prediction);
     }
 }
 
@@ -236,7 +251,7 @@ void app_main(void) {
         }
 #endif
 
-        /* ── DHT22 + batería: sólo cuando toca según el intervalo ── */
+        /* ── DHT11 + batería: sólo cuando toca según el intervalo ── */
         monitor_data_t cfg_snap;
         monitor_state_snapshot(&state, &cfg_snap);
         const int64_t sensor_interval_ms = (int64_t)cfg_snap.sensor_interval_seconds * 1000;
@@ -244,7 +259,7 @@ void app_main(void) {
         if (now_ms - (uint32_t)last_read_ms >= (uint32_t)sensor_interval_ms) {
             last_read_ms = now_ms;
 
-            /* DHT22: requiere mínimo 2.5 s entre lecturas */
+            /* Separate DHT11 reads by 2.5 s. */
             if (now_ms - (uint32_t)last_dht_ms >= 2500) {
                 last_dht_ms = now_ms;
                 dht_ok      = dht_read(&dht) == ESP_OK;
@@ -253,21 +268,21 @@ void app_main(void) {
                     dht.temperature = 24.0f;
                     dht.humidity    = 45.0f;
                     dht_ok          = true;
-                    ESP_LOGW(TAG, "DHT22 simulado: valores de respaldo");
+                    ESP_LOGW(TAG, "DHT11 simulado: valores de respaldo");
                 }
 #endif
                 if (!dht_ok) {
-                    ESP_LOGW(TAG, "No se pudo leer el DHT22");
-                    monitor_state_log_event(&state, "DHT22 unavailable");
+                    ESP_LOGW(TAG, "No se pudo leer el DHT11");
+                    monitor_state_log_event(&state, "DHT11 unavailable");
                 } else {
-                    monitor_state_log_event(&state, "DHT22 read OK");
+                    monitor_state_log_event(&state, "DHT11 read OK");
                 }
             }
 
             const float battery_voltage = read_battery_voltage(adc, adc_calibration);
             monitor_state_set_sensors(&state, battery_voltage, dht.temperature, dht.humidity,
                                       dht_ok, now_ms);
-            float pressure_hpa = 0.0f;
+            float pressure_hpa     = 0.0f;
             const bool pressure_ok = bmp_ok && monitor_bmp280_read(&pressure_hpa);
             monitor_state_set_bmp280(&state, pressure_hpa, pressure_ok);
 
@@ -275,12 +290,12 @@ void app_main(void) {
                 if (dht_ok) {
                     /* The published demo model was trained on the range [0, 2π]. */
                     float temperature_fraction = (dht.temperature + 40.0f) / 120.0f;
-                    log_tflm_prediction("DHT22 temperature", temperature_fraction);
+                    log_tflm_prediction("DHT11 temperature", temperature_fraction);
 
                     const float humidity_fraction = dht.humidity / 100.0f;
-                    log_tflm_prediction("DHT22 humidity", humidity_fraction);
+                    log_tflm_prediction("DHT11 humidity", humidity_fraction);
                 } else {
-                    /* Use the ADC reading as a fallback when DHT22 is unavailable. */
+                    /* Use the ADC reading as a fallback when DHT11 is unavailable. */
                     const float battery_fraction = battery_voltage / 5.0f;
                     log_tflm_prediction("battery voltage", battery_fraction);
                 }

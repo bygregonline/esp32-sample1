@@ -242,7 +242,7 @@ where
             lcd_text(display, "HUM", 82, 52, C_LABEL);
             lcd_text(display, h.as_str(), 106, 52, C_VALUE);
         } else {
-            lcd_text(display, "DHT22 SIN DATOS", 34, 52, C_WARN);
+            lcd_text(display, "DHT11 SIN DATOS", 34, 52, C_WARN);
         }
     }
     lcd_hline(display, 62, C_DIM);

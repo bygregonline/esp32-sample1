@@ -23,7 +23,7 @@ Arduino_GFX *lcd = new Arduino_ST7789(
     LCD_X_OFFSET, LCD_Y_OFFSET, LCD_X_OFFSET, LCD_Y_OFFSET);
 
 Adafruit_SSD1306 oled(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
-DHT dht(DHT_PIN, DHT22);
+DHT dht(DHT_PIN, DHT11);
 HardwareSerial gpsSerial(1);
 TinyGPSPlus gps;
 
@@ -75,7 +75,7 @@ void renderLcd() {
 
     drawLcdLine("TEMPERATURA / HUMEDAD", 64, COLOR_CYAN);
     if (isnan(temperatureC) || isnan(humidityPercent)) {
-        drawLcdLine("DHT22: --", 76, COLOR_YELLOW);
+        drawLcdLine("DHT11: --", 76, COLOR_YELLOW);
     } else {
         snprintf(line, sizeof(line), "Temp: %.1f C", temperatureC);
         drawLcdLine(line, 76, COLOR_WHITE);
@@ -122,7 +122,7 @@ void renderOled() {
 
     oled.setCursor(0, 20);
     if (isnan(temperatureC) || isnan(humidityPercent)) {
-        oled.println("DHT22: --");
+        oled.println("DHT11: --");
     } else {
         snprintf(line, sizeof(line), "T %.1fC H %.0f%%", temperatureC,
                  humidityPercent);
@@ -160,7 +160,7 @@ void readDhtIfDue(uint32_t nowMs) {
     if (isnan(newHumidity) || isnan(newTemperature)) {
         temperatureC = NAN;
         humidityPercent = NAN;
-        Serial.println("Error leyendo DHT22");
+        Serial.println("Error leyendo DHT11");
         return;
     }
 

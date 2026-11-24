@@ -1,6 +1,6 @@
 # Firmware Rust para ESP32
 
-Versión Rust del monitor de batería, DHT22, BMP280, GPS, clima y fase lunar para las pantallas Waveshare ST7789V2 170 × 320 y SSD1306 128 × 64. La LCD a color dibuja un icono de luna cuya parte iluminada sigue la fase recibida. Está configurada para una **placa ESP32-S3 N16R8 de doble USB-C** (16 MB flash, 8 MB PSRAM), con GPIO basados en la referencia ESP32-S3-DevKitC-1; verifica el rotulado de la placa concreta antes de cablear. Usa ESP-IDF con Rust `std` mediante `esp-idf-svc`.
+Versión Rust del monitor de batería, DHT11, BMP280, GPS, clima y fase lunar para las pantallas Waveshare ST7789V2 170 × 320 y SSD1306 128 × 64. La LCD a color dibuja un icono de luna cuya parte iluminada sigue la fase recibida. Está configurada para una **placa ESP32-S3 N16R8 de doble USB-C** (16 MB flash, 8 MB PSRAM), con GPIO basados en la referencia ESP32-S3-DevKitC-1; verifica el rotulado de la placa concreta antes de cablear. Usa ESP-IDF con Rust `std` mediante `esp-idf-svc`.
 
 ## Diagramas y pantallas
 
@@ -33,7 +33,7 @@ El dashboard web refresca el snapshot cada dos segundos, mantiene el contador ci
 | LCD BL | 3V3, luz fija |
 | OLED I2C SDA / SCL | 8 / 9 |
 | BMP280 I2C1 SDA / SCL | 1 / 2 |
-| DHT22 DATA | 6 |
+| DHT11 DATA | 6 |
 | GPS UART RX / TX | 18 / 17 |
 | Voltaje ADC1 | 4 (ADC1_CH3) |
 
@@ -49,7 +49,7 @@ El módulo típico 0–25 V entrega hasta 5 V en su salida. Para limitar la entr
 
 ## TensorFlow Lite Micro: prueba float32
 
-Rust ejecuta el mismo modelo de demostración `hello_world` que C mediante el componente nativo compartido [`components/tflm_demo/`](../components/tflm_demo/). Usamos TensorFlow Lite Micro para ejercitar inferencia `float32` en el CPU/FPU del ESP32-S3. Este chip tiene FPU, no TPU; la prueba valida la integración del runtime, no es una prueba de TPU ni un benchmark. El modelo aproxima `sin(x)`; el firmware normaliza temperatura y humedad del DHT22 y las ejecuta en llamadas separadas. Si el DHT22 no está disponible, usa el voltaje de batería. Las predicciones aparecen en el monitor serial bajo `TFLM demo`; no son pronósticos ambientales ni alteran el API.
+Rust ejecuta el mismo modelo de demostración `hello_world` que C mediante el componente nativo compartido [`components/tflm_demo/`](../components/tflm_demo/). Usamos TensorFlow Lite Micro para ejercitar inferencia `float32` en el CPU/FPU del ESP32-S3. Este chip tiene FPU, no TPU; la prueba valida la integración del runtime, no es una prueba de TPU ni un benchmark. El modelo aproxima `sin(x)`; el firmware normaliza temperatura y humedad del DHT11 y las ejecuta en llamadas separadas. Si el DHT11 no está disponible, usa el voltaje de batería. Las predicciones aparecen en el monitor serial bajo `TFLM demo`; no son pronósticos ambientales ni alteran el API.
 
 El proyecto Rust declara el componente compartido en `Cargo.toml`; ESP-IDF Component Manager descarga `espressif/esp-tflite-micro` al compilar. La interfaz C se consume mediante FFI desde [`src/ml_demo.rs`](src/ml_demo.rs).
 

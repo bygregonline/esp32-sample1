@@ -52,13 +52,15 @@ static const char INDEX_HTML[] =
     "color:#e8f0fc;min-height:100vh}"
     "h1{font-size:1.65rem;margin:0 0 4px;color:#f1f6ff;letter-spacing:-.03em}"
     ".hero{padding-right:70px;min-height:60px;margin-bottom:18px}"
-    ".eyebrow{font-size:.7rem;color:#78b8ff;text-transform:uppercase;letter-spacing:.18em;margin:0 0 4px}"
+    ".eyebrow{font-size:.7rem;color:#78b8ff;text-transform:uppercase;letter-spacing:.18em;margin:0 "
+    "0 4px}"
     ".refresh-badge{position:fixed;z-index:5;top:12px;right:12px;left:auto;width:54px;height:54px;"
     "display:grid;place-items:center;border:1px solid #29415d;border-radius:16px;"
     "background:#101a29eF;box-shadow:0 8px 30px #0008;backdrop-filter:blur(8px)}"
     ".refresh-badge svg{position:absolute;width:42px;height:42px;transform:rotate(-90deg)}"
     ".ring-track,.ring-progress{fill:none;stroke-width:3.5}.ring-track{stroke:#24364b}"
-    ".ring-progress{stroke:#54d6c7;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:0;transition:stroke-dashoffset .5s}"
+    ".ring-progress{stroke:#54d6c7;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:0;"
+    "transition:stroke-dashoffset .5s}"
     "#refresh-time{font:600 10px ui-monospace,monospace;color:#e8f0fc}"
     "h2{font-size:1rem;margin:0 0 8px;color:#79c0ff}"
     "section{background:#161b22;padding:14px 16px;border-radius:10px;margin:10px 0;"
@@ -69,7 +71,8 @@ static const char INDEX_HTML[] =
     "button{margin-top:10px;background:#238636;color:#fff;border-color:#2ea043}"
     "button:hover{background:#2ea043}"
     ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}"
-    ".card{background:#0b1420;border-radius:11px;padding:13px 14px;border:1px solid #1e3043;min-width:0}"
+    ".card{background:#0b1420;border-radius:11px;padding:13px 14px;border:1px solid "
+    "#1e3043;min-width:0}"
     ".lbl{font-size:.75rem;color:#8b949e;text-transform:uppercase;letter-spacing:.05em}"
     ".val{font-size:1.15rem;font-weight:600;margin-top:2px}"
     ".moon-card{display:flex;align-items:center;gap:12px;min-height:82px}"
@@ -82,12 +85,14 @@ static const char INDEX_HTML[] =
     "#msg{margin-top:8px;font-size:.85rem}"
     "</style>"
     "<div class='refresh-badge' aria-label='Sensor refresh countdown'><svg viewBox='0 0 40 40'>"
-    "<circle class='ring-track' cx='20' cy='20' r='16'/><circle id='refresh-ring' class='ring-progress' cx='20' cy='20' r='16'/></svg>"
+    "<circle class='ring-track' cx='20' cy='20' r='16'/><circle id='refresh-ring' "
+    "class='ring-progress' cx='20' cy='20' r='16'/></svg>"
     "<span id='refresh-time'>--</span></div>"
     "<header class='hero'><p class='eyebrow'>LIVE SENSOR STATION</p><h1>ESP32 Monitor</h1></header>"
 
     "<section><div class='grid'>"
-    "<div class='card'><div class='lbl'>Hora local</div><div class='val' id='cv-clock'>--</div></div>"
+    "<div class='card'><div class='lbl'>Hora local</div><div class='val' "
+    "id='cv-clock'>--</div></div>"
     "<div class='card'><div class='lbl'>IP address</div><div class='val' id='cv-ip'>--</div></div>"
     "</div></section>"
 
@@ -99,10 +104,12 @@ static const char INDEX_HTML[] =
     "<div class='card'><div class='lbl'>Temperatura</div><div class='val' "
     "id='cv-temp'>--</div></div>"
     "<div class='card'><div class='lbl'>Humedad</div><div class='val' id='cv-hum'>--</div></div>"
-    "<div class='card'><div class='lbl'>Pressure</div><div class='val' id='cv-pressure'>--</div></div>"
+    "<div class='card'><div class='lbl'>Pressure</div><div class='val' "
+    "id='cv-pressure'>--</div></div>"
     "<div class='card'><div class='lbl'>Latitude</div><div class='val' id='cv-lat'>--</div></div>"
     "<div class='card'><div class='lbl'>Longitude</div><div class='val' id='cv-lon'>--</div></div>"
-    "<div class='card'><div class='lbl'>Weather forecast</div><div class='val' id='cv-wx'>--</div></div>"
+    "<div class='card'><div class='lbl'>Weather forecast</div><div class='val' "
+    "id='cv-wx'>--</div></div>"
     "<div class='card moon-card'><img id='moon-photo' alt='Current moon phase' src='/moon.bmp'>"
     "<div><div class='lbl'>Lunar phase</div><div class='moon-title' id='cv-moon'>--</div>"
     "<div class='muted' id='cv-moon-illum'>Moon illumination</div></div></div>"
@@ -162,20 +169,26 @@ static const char INDEX_HTML[] =
     "  s.temperature_c!=null?'ok':'warn');"
     "set('cv-hum',s.humidity_percent!=null?s.humidity_percent.toFixed(0)+' %':'--',"
     "  s.humidity_percent!=null?'ok':'warn');"
-    "set('cv-pressure',s.pressure_hpa!=null?s.pressure_hpa.toFixed(1)+' hPa':'Sensor unavailable',s.bmp280_valid?'ok':'muted');"
+    "set('cv-pressure',s.pressure_hpa!=null?s.pressure_hpa.toFixed(1)+' hPa':'Sensor "
+    "unavailable',s.bmp280_valid?'ok':'muted');"
     "set('cv-lat',g.fix?g.latitude.toFixed(5):'--',g.fix?'ok':'warn');"
     "set('cv-lon',g.fix?g.longitude.toFixed(5):'--',g.fix?'ok':'warn');"
-    "set('cv-wx',w.available?(w.summary+' '+w.current_temperature_c.toFixed(1)+'C · '+w.minimum_temperature_c.toFixed(0)+'/'+w.maximum_temperature_c.toFixed(0)+'C · rain '+w.precipitation_probability+'%'):'Sin datos',"
+    "set('cv-wx',w.available?(w.summary+' '+w.current_temperature_c.toFixed(1)+'C · "
+    "'+w.minimum_temperature_c.toFixed(0)+'/'+w.maximum_temperature_c.toFixed(0)+'C · rain "
+    "'+w.precipitation_probability+'%'):'Sin datos',"
     "  w.available?'ok':'muted');"
     "set('cv-moon',w.moon_phase!=null?moonName(w.moon_phase):'--');"
-    "set('cv-moon-illum',w.moon_illumination_percent!=null?w.moon_illumination_percent+'% illuminated':'Moon data unavailable','muted');"
-    "if(w.moon_phase!=null){const k=Math.floor(w.moon_phase*255),im=document.querySelector('#moon-photo');"
+    "set('cv-moon-illum',w.moon_illumination_percent!=null?w.moon_illumination_percent+'% "
+    "illuminated':'Moon data unavailable','muted');"
+    "if(w.moon_phase!=null){const "
+    "k=Math.floor(w.moon_phase*255),im=document.querySelector('#moon-photo');"
     "if(im.dataset.phase!==String(k)){im.dataset.phase=String(k);im.src='/moon.bmp?v='+k;}}"
     "document.querySelector('#cv-events').textContent=(d.events||[]).join('\\n')||'No events yet';"
     "const rem=r.remaining_seconds;const iv=r.interval_seconds||1;"
     "document.querySelector('#refresh-time').textContent=rem>=0?"
     "(String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0')):'--:--';"
-    "document.querySelector('#refresh-ring').style.strokeDashoffset=String(100*(1-Math.max(0,Math.min(1,rem/iv))));"
+    "document.querySelector('#refresh-ring').style.strokeDashoffset=String(100*(1-Math.max(0,Math."
+    "min(1,rem/iv))));"
     "set('cv-upd',r.interval_seconds+'s / '+(rem>=0?rem+'s restantes':'esperando'),"
     "  rem>=0?(rem/r.interval_seconds>0.3?'ok':'warn'):'muted');"
     "document.querySelector('#iv').value=r.interval_seconds;"
@@ -225,9 +238,9 @@ static void add_number_or_null(cJSON *obj, const char *key, bool valid, double v
 }
 
 static void add_local_time(cJSON *obj) {
-    time_t epoch = time(NULL);
+    time_t epoch    = time(NULL);
     struct tm local = {0};
-    char value[32] = "TIME SYNCING";
+    char value[32]  = "TIME SYNCING";
     if (epoch > 1700000000 && localtime_r(&epoch, &local))
         strftime(value, sizeof(value), "%a %d %b %H:%M", &local);
     cJSON_AddStringToObject(obj, "local_time", value);
@@ -310,17 +323,16 @@ static esp_err_t index_handler(httpd_req_t *req) {
 static esp_err_t moon_image_handler(httpd_req_t *req) {
     monitor_data_t data;
     monitor_state_snapshot(s_state, &data);
-    if (s_moon_image_mutex == NULL ||
-        xSemaphoreTake(s_moon_image_mutex, portMAX_DELAY) != pdTRUE) {
+    if (s_moon_image_mutex == NULL || xSemaphoreTake(s_moon_image_mutex, portMAX_DELAY) != pdTRUE) {
         return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
                                    "Moon image buffer unavailable");
     }
-    moon_image_render_bmp(data.moon_phase_valid ? data.moon_phase : 0.0f,
-                          s_moon_image_buffer, sizeof(s_moon_image_buffer));
+    moon_image_render_bmp(data.moon_phase_valid ? data.moon_phase : 0.0f, s_moon_image_buffer,
+                          sizeof(s_moon_image_buffer));
     httpd_resp_set_type(req, "image/bmp");
     httpd_resp_set_hdr(req, "Cache-Control", "private, max-age=3600");
-    const esp_err_t result = httpd_resp_send(req, (const char *)s_moon_image_buffer,
-                                             sizeof(s_moon_image_buffer));
+    const esp_err_t result =
+        httpd_resp_send(req, (const char *)s_moon_image_buffer, sizeof(s_moon_image_buffer));
     xSemaphoreGive(s_moon_image_mutex);
     return result;
 }

@@ -105,7 +105,7 @@ static bool parse_weather_response(const weather_http_response_t *response,
     double maximum;
     double precipitation;
     double moon_phase = 0;
-    const bool valid = cJSON_IsObject(current) && cJSON_IsObject(daily) &&
+    const bool valid  = cJSON_IsObject(current) && cJSON_IsObject(daily) &&
                        number_value(current, "temperature_2m", &current_temperature) &&
                        number_value(current, "relative_humidity_2m", &current_humidity) &&
                        number_value(current, "weather_code", &current_code) &&
@@ -122,7 +122,7 @@ static bool parse_weather_response(const weather_http_response_t *response,
         weather->minimum_temperature_c     = (float)minimum;
         weather->maximum_temperature_c     = (float)maximum;
         weather->precipitation_probability = (int)precipitation;
-        weather->moon_phase = (float)moon_phase;
+        weather->moon_phase                = (float)moon_phase;
         weather->moon_illumination_percent =
             (int)lroundf((1.0f - cosf((float)moon_phase * 6.28318530718f)) * 50.0f);
         weather->moon_phase_valid = moon_ok;

@@ -44,9 +44,9 @@ This project was generated 100% by artificial intelligence to test mixed capabil
 
 ![A small brick figure watches telemetry screens while a robot programs in a dark workspace](docs/visuals/hero-esp32-telemetry.png)
 
-A multi-implementation ESP32 telemetry project for DHT22 temperature/humidity, BMP280 pressure, NEO-6M GPS coordinates, battery voltage, local date/time, weather, and lunar phase. C, MicroPython, and Rust include an auto-refreshing web dashboard, HTTP API, Wi-Fi setup, Open-Meteo forecasts, and a BLE GATT service that serves the telemetry as JSON, text, YAML, or XML. Their large color LCD includes a shrinking circular refresh timer and a recent-event logger; the small OLED shows a compact sensor snapshot. Arduino currently covers its sensor and display path.
+A multi-implementation ESP32 telemetry project for DHT11 temperature/humidity, BMP280 pressure, GY-NEO6MV2 GPS coordinates, battery voltage, local date/time, weather, and lunar phase. C, MicroPython, and Rust include an auto-refreshing web dashboard, HTTP API, Wi-Fi setup, Open-Meteo forecasts, and a BLE GATT service that serves the telemetry as JSON, text, YAML, or XML. Their large color LCD includes a shrinking circular refresh timer and a recent-event logger; the small OLED shows a compact sensor snapshot. Arduino currently covers its sensor and display path.
 
-The three full-featured versions share an API contract; C / ESP-IDF is the reference implementation. C and Rust use TensorFlow Lite Micro (TFLM) to exercise float32 inference on the ESP32-S3 CPU and its FPU with the same published `hello_world` sine model. The ESP32-S3 has an FPU, not a TPU; this is an inference integration check, not a TPU test, performance benchmark, or sensor forecast. Normalized DHT22 temperature and humidity are passed in separate inferences (or battery voltage when DHT22 is unavailable), and the outputs are logged. The standard MicroPython firmware does not include TFLM; its README documents the custom firmware needed to add it. Arduino currently covers the sensor and display path:
+The three full-featured versions share an API contract; C / ESP-IDF is the reference implementation. C and Rust use TensorFlow Lite Micro (TFLM) to exercise float32 inference on the ESP32-S3 CPU and its FPU with the same published `hello_world` sine model. The ESP32-S3 has an FPU, not a TPU; this is an inference integration check, not a TPU test, performance benchmark, or sensor forecast. Normalized DHT11 temperature and humidity are passed in separate inferences (or battery voltage when DHT11 is unavailable), and the outputs are logged. The standard MicroPython firmware does not include TFLM; its README documents the custom firmware needed to add it. Arduino currently covers the sensor and display path:
 
 | Directory | Stack | Web dashboard/API | BLE | Weather |
 |-----------|-------|-------------------|-----|---------|
@@ -91,9 +91,9 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
 - **Board:** Dual USB-C ESP32-S3 development board with ESP32-S3-WROOM-1 N16R8 (16 MB flash, 8 MB octal PSRAM); GPIO map follows the ESP32-S3-DevKitC-1 reference
 - **LCD:** Waveshare 1.9" 170×320 ST7789V2, SPI
 - **OLED:** Generic 0.96" 128×64 SSD1306, I2C
-- **Temperature/Humidity:** DHT22
+- **Temperature/Humidity:** DHT11
 - **Atmospheric pressure:** BMP280-3.3, I²C at 3.3 V (dedicated bus: SDA GPIO1, SCL GPIO2; addresses 0x76/0x77)
-- **GPS:** u-blox NEO-6M, UART 9600 baud
+- **GPS:** u-blox NEO-6M on GY-NEO6MV2, UART 9600 baud
 - **Battery voltage:** 0–25 V module (5:1 divider) + external 12 kΩ/10 kΩ divider into ADC1 GPIO4 (ADC1_CH3)
 
 ### Wiring diagrams and display mockup
@@ -102,9 +102,15 @@ The three full-featured versions share an API contract; C / ESP-IDF is the refer
 
 ![ESP32 centered between two solderless breadboard sections](docs/visuals/diagrama-conexiones-esp32-protoboard.png)
 
+[Technical breadboard diagram without photos](docs/visuals/diagrama-tecnico-esp32-protoboard.svg) shows the component and resistor connections in more detail.
+
+Separate diagrams with the labeled ESP32-S3 board: [voltage module](docs/visuals/diagrama-componente-voltage-esp32.svg), [DHT11](docs/visuals/diagrama-componente-dht-esp32.svg), [OLED SSD1306](docs/visuals/diagrama-componente-oled-esp32.svg), [LCD ST7789V2](docs/visuals/diagrama-componente-lcd-esp32.svg), [BMP280](docs/visuals/diagrama-componente-bmp-esp32.svg), and [GPS GY-NEO6MV2](docs/visuals/diagrama-componente-gps-esp32.svg).
+
 The ESP32 sits between two separate breadboard sections so the displays can connect on the left and the sensors on the right. Each five-hole strip connects horizontally; the power rails connect vertically. Numbered rows on opposite sections are isolated unless a jumper explicitly joins them. Insulated wires that pass over a rail connect only at their marked endpoint holes.
 
-The board uses an ESP32-S3-WROOM-1 N16R8 module and has two USB-C connectors. Firmware targets the N16R8 configuration and follows the ESP32-S3-DevKitC-1 GPIO map; check the labels on the purchased board before wiring because dual-USB-C carrier-board layouts can differ. The left section carries the LCD (SCK/MOSI/CS/DC/RST on GPIO12/11/10/13/14) and OLED (SCL/SDA on GPIO9/8). The right section carries DHT22 DATA on GPIO6, GPS TX/RX on GPIO18/17, battery ADC on GPIO4, and BMP280 SDA/SCL on GPIO1/2. The BMP280 uses its own I²C controller. Keep GPIO19/20 reserved for native USB and do not use GPIO35–37, which are tied to octal flash/PSRAM on this module.
+The board uses an ESP32-S3-WROOM-1 N16R8 module and has two USB-C connectors. Firmware targets the N16R8 configuration and follows the ESP32-S3-DevKitC-1 GPIO map; check the labels on the purchased board before wiring because dual-USB-C carrier-board layouts can differ. The left breadboard section carries the LCD (SCK/MOSI/CS/DC/RST on GPIO12/11/10/13/14), OLED (SCL/SDA on GPIO9/8), DHT11 DATA on GPIO6, and battery ADC on GPIO4. The right section carries the GPS module (TX/RX routed to the left board header's GPIO18/17) and BMP280 SDA/SCL on GPIO1/2. The BMP280 uses its own I²C controller. Keep GPIO19/20 reserved for native USB and do not use GPIO35–37, which are tied to octal flash/PSRAM on this module.
+
+The pictured GY-NEO6MV2 connector reads VCC, RX, TX, GND from top to bottom with the antenna on the right. Connect GPS TX to ESP32 GPIO18 (RX); GPS RX can connect to ESP32 GPIO17 (TX). Check the silkscreen on the actual GPS board before wiring.
 
 #### Wiring overview
 
@@ -132,9 +138,9 @@ The board uses an ESP32-S3-WROOM-1 N16R8 module and has two USB-C connectors. Fi
 | BMP280-3.3 | SDA / SCL | 1 / 2 (I²C1, dedicated bus) |
 | BMP280-3.3 | I2C address | 0x76 or 0x77 |
 | BMP280-3.3 | VCC | 3V3 |
-| DHT22 | DATA | 6 |
-| GPS NEO-6M | TX → ESP RX | 18 |
-| GPS NEO-6M | RX ← ESP TX | 17 (optional) |
+| DHT11 | DATA | 6 |
+| GPS GY-NEO6MV2 | TX → ESP RX | 18 |
+| GPS GY-NEO6MV2 | RX ← ESP TX | 17 (optional) |
 | Battery ADC | Signal | 4 (ADC1_CH3) |
 
 ### Battery voltage divider
@@ -294,7 +300,7 @@ curl http://<IP>/api/status
 
 ## Bluetooth Low Energy
 
-The C, MicroPython, and Rust firmware advertise as `ESP32-Monitor`. GATT service `0xFFA0` exposes four read-only characteristics: `0xFFA1` JSON, `0xFFA2` key/value text, `0xFFA3` YAML, and `0xFFA4` XML. A BLE central reads the characteristic for the format it needs. All formats share compact field names for local time, Wi-Fi/IP, battery, DHT22, BMP280, GPS, forecast, lunar phase, countdown, and the latest system event. Unavailable sensor data is represented as `null` (or an empty XML value). The HTTP API remains available at the same time.
+The C, MicroPython, and Rust firmware advertise as `ESP32-Monitor`. GATT service `0xFFA0` exposes four read-only characteristics: `0xFFA1` JSON, `0xFFA2` key/value text, `0xFFA3` YAML, and `0xFFA4` XML. A BLE central reads the characteristic for the format it needs. All formats share compact field names for local time, Wi-Fi/IP, battery, DHT11, BMP280, GPS, forecast, lunar phase, countdown, and the latest system event. Unavailable sensor data is represented as `null` (or an empty XML value). The HTTP API remains available at the same time.
 
 See [the BLE protocol reference](docs/ble.md) for UUIDs, data format details, and central-client behavior.
 
@@ -424,7 +430,7 @@ curl -X POST http://<IP>/api/config/display \
 }
 ```
 
-> `display_mask` bitmask: bit 0 = battery, bit 1 = DHT22, bit 2 = GPS, bit 3 = weather, bit 4 = pressure, bit 5 = moon phase.
+> `display_mask` bitmask: bit 0 = battery, bit 1 = DHT11, bit 2 = GPS, bit 3 = weather, bit 4 = pressure, bit 5 = moon phase.
 > `0x3F` (63) = all visible. `0x00` = all hidden.
 
 ---
@@ -546,7 +552,7 @@ curl -X POST http://<IP>/api/config/interval \
 │
 ├── c/                   ← C / ESP-IDF 5.x (source of truth)
 │   ├── main/
-│   │   ├── main.c           main loop, DHT22 bit-bang, ADC
+│   │   ├── main.c           main loop, DHT11 bit-bang, ADC
 │   │   ├── display.c/h      LCD + OLED render, custom 5×7 font, countdown ring
 │   │   ├── gps.c/h          NMEA parser (RMC + GGA), checksum validation
 │   │   ├── monitor_state.c/h  FreeRTOS mutex-protected shared state
@@ -731,6 +737,28 @@ The target is `xtensa-esp32s3-espidf` (std, ESP-IDF bindings via `esp-idf-sys`).
 
 ---
 
+### Serial logs
+
+The board prints a recurring summary with battery voltage, DHT11 temperature and humidity, and GPS fix status. C also includes the Wi-Fi address in that summary. Startup, sensor errors, Wi-Fi, weather, and TFLM messages appear when those events occur (TFLM is used in C and Rust). For example, a C log line contains:
+
+```text
+Bat 4.12V | T 24.0C | H 52.0% | GPS FIX | Wi-Fi 192.168.1.50 | ciclo 10s
+```
+
+To watch C logs **without flashing again**, connect the board and run:
+
+```bash
+cd c/
+. ./scripts/activate-esp-idf.sh
+idf.py -p /dev/cu.usbserial-0001 monitor
+```
+
+Replace the example port with your board's serial port. For MicroPython, use `cd python/` followed by `../.venv/bin/mpremote connect auto repl`. For Rust, `cd rust/ && ./scripts/deploy.sh` flashes the firmware and opens its serial monitor. Only one program can hold the serial port at a time.
+
+The recent-event logger shown on the LCD and served by the API is separate: not every entry is printed over serial. The serial summary also omits some fields, including BMP280 pressure and GPS coordinates; read the full current snapshot from `GET /api/status`.
+
+---
+
 ### Arduino
 
 Requires Arduino CLI or Arduino IDE with the ESP32 core.
@@ -778,7 +806,7 @@ curl -X POST http://192.168.4.1/wifi \
 The simulation profile (`wokwi.toml` + `diagram.json` at the repo root) runs the C firmware in Wokwi for VS Code with:
 
 - Fixed GPS coordinates (Mexico City: 19.4326, -99.1332)
-- Simulated DHT22 and potentiometer for voltage
+- Simulated DHT22 as a DHT11 stand-in, plus a potentiometer for voltage
 - `Wokwi-GUEST` open Wi-Fi network
 - ILI9341 display (substitute for the ST7789V2 — same logical area)
 - Port forwarding: `localhost:8180` → ESP32 port 80
@@ -802,7 +830,7 @@ curl -X POST http://localhost:8180/api/config/interval \
 
 ## Notes
 
-- **DHT22 minimum interval:** 2.5 s between reads, enforced regardless of the configured sensor cycle.
+- **DHT11 read interval:** firmware waits at least 2.5 s between reads, regardless of the configured sensor cycle.
 - **Weather forecast:** requires Wi-Fi + GPS fix + NTP sync. Refreshes every 300 s or when GPS moves > 0.005°. Uses [Open-Meteo](https://open-meteo.com/) — no API key required.
 - **NTP:** the C and Rust implementations use `pool.ntp.org`; Python uses MicroPython's built-in `ntptime`. Required for TLS certificate validation.
 - **ADC calibration:** each board varies. Measure with a multimeter and adjust `VOLTAGE_CALIBRATION` in the respective config file.
@@ -817,13 +845,17 @@ This project is dual-licensed under the MIT License or Apache License, Version 2
 
 ## Prototype fabrication files
 
-The repository includes two enclosure concepts for the assembled MVP. Both place the color LCD and OLED on the front, keep the ESP32 accessible behind them, and use a desktop viewing angle.
+The repository includes two enclosure concepts for the assembled MVP. The 3D-printed version has been updated for a landscape ILI9488 3.5-inch LCD and two solar panels on its rear face. The separate CNC acrylic concept still uses the older small LCD dimensions.
 
 ### 3D-printed prototype
 
-[![3D-printed ESP32 telemetry enclosure concept — click to rotate the STL on GitHub](supportfiles/3d/preview.png)](supportfiles/3d/esp32_mvp_assembly.stl)
+[![3D-printed ESP32 telemetry enclosure with ILI9488 and marked screw holes — click to rotate the STL on GitHub](supportfiles/3d/manual-front.png)](supportfiles/3d/esp32_mvp_assembly.stl)
 
-The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [assembled STL](supportfiles/3d/esp32_mvp_assembly.stl) are included. The clickable preview opens GitHub's interactive STL viewer; individual [front](supportfiles/3d/esp32_mvp_front.stl), [rear](supportfiles/3d/esp32_mvp_back.stl), and [side](supportfiles/3d/esp32_mvp_side.stl) files are the print parts (print two sides). Dimensions and export instructions are in [supportfiles/3d/README.md](supportfiles/3d/README.md).
+![Rear face with two solar panels and arrows to the screw holes](supportfiles/3d/manual-back.png)
+
+![Base with arrows to the four assembly screw holes](supportfiles/3d/manual-base.png)
+
+The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [assembled STL](supportfiles/3d/esp32_mvp_assembly.stl) are included. Print the [front](supportfiles/3d/esp32_mvp_front.stl), [rear](supportfiles/3d/esp32_mvp_back.stl), [base](supportfiles/3d/esp32_mvp_base.stl), two [sides](supportfiles/3d/esp32_mvp_side.stl), and six [solar clips](supportfiles/3d/esp32_mvp_solar_clip.stl). The front, rear, and base have aligned M3 assembly holes; the solar positions use the Steren PS-003 reference dimensions of 56 × 60 × 3 mm. See [supportfiles/3d/README.md](supportfiles/3d/README.md) for dimensions and fasteners.
 
 ### CNC-cut acrylic prototype
 
@@ -831,4 +863,4 @@ The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [ass
 
 The [1:1 metric SVG layout](supportfiles/cnc/esp32_mvp_acrylic_panels.svg) contains the front and rear panels and two angled side cheeks for 2.8 mm acrylic. Separate [GRBL files](supportfiles/cnc/gcode/) are provided for the 3018: [front](supportfiles/cnc/gcode/esp32_mvp_front_grbl.nc), [rear](supportfiles/cnc/gcode/esp32_mvp_rear_grbl.nc), and [side cheek](supportfiles/cnc/gcode/esp32_mvp_side_grbl.nc), which is cut twice. They assume a 3.175 mm single-flute cutter and need the controller and cutter settings checked before use. See [supportfiles/cnc/README.md](supportfiles/cnc/README.md).
 
-Both concepts are fit-check prototypes. The Waveshare LCD body is 27.3 × 51.2 mm; generic SSD1306 boards vary, so measure the specific display modules and adjust the model or cutting profile before fabrication. The preview PNGs illustrate the concept; use the SCAD and SVG files for geometry.
+Both concepts are fit-check prototypes. Confirm that the purchased ILI9488 and SSD1306 match the modeled dimensions and verify that the solar modules match the Steren PS-003 footprint. The CNC layout has not yet been resized for the ILI9488. Use the SCAD/STL and CNC SVG files for geometry rather than treating the preview PNGs as drawings.

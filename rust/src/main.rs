@@ -1,6 +1,6 @@
 //! ESP32 Monitor — Rust/ESP-IDF (std)
 //!
-//! Equivalente completo al C: sensores DHT22, GPS NEO-6M, ADC batería,
+//! Equivalente completo al C: sensores DHT11, GPS GY-NEO6MV2, ADC batería,
 //! LCD ST7789V2, OLED SSD1306, Wi-Fi AP+STA, servidor HTTP, clima Open-Meteo.
 //!
 //! Endpoints idénticos a la implementación C:
@@ -40,7 +40,7 @@ use esp_idf_svc::{
     systime::EspSystemTime,
 };
 
-use dht_sensor::dht22;
+use dht_sensor::dht11;
 use mipidsi::{interface::SpiInterface, models::ST7789, options::ColorOrder, Builder};
 use ssd1306::{
     mode::{BufferedGraphicsMode, DisplayConfig},
@@ -133,11 +133,11 @@ fn main() -> anyhow::Result<()> {
     oled.init()
         .map_err(|error| anyhow::anyhow!("OLED init failed: {error:?}"))?;
 
-    // ── DHT22 GPIO6 (open-drain + pull-up) ───────────────────────────────
+    // ── DHT11 GPIO6 (open-drain + pull-up) ───────────────────────────────
     let mut dht_pin = PinDriver::input_output_od(peripherals.pins.gpio6, Pull::Up)?;
     dht_pin.set_high()?;
 
-    // ── GPS NEO-6M UART1 (RX=18, TX=17) 9600 baud ────────────────────────
+    // ── GPS GY-NEO6MV2 UART1 (RX=18, TX=17) 9600 baud ────────────────────────
     let gps_uart = UartDriver::new(
         peripherals.uart1,
         peripherals.pins.gpio17, // TX del ESP → RX del GPS
@@ -204,18 +204,18 @@ fn main() -> anyhow::Result<()> {
         if t.saturating_sub(sensor_last_ms) >= interval_ms {
             sensor_last_ms = t;
 
-            // DHT22 — mínimo 2.5 s entre lecturas
+            // Separate DHT11 reads by 2.5 s.
             if t.saturating_sub(dht_last_ms) >= 2500 {
                 dht_last_ms = t;
-                match dht22::blocking::read(&mut delay, &mut dht_pin) {
+                match dht11::blocking::read(&mut delay, &mut dht_pin) {
                     Ok(r) => {
-                        temperature = Some(r.temperature);
-                        humidity = Some(r.relative_humidity);
-                        state.log_event("DHT22 read OK");
+                        temperature = Some(f32::from(r.temperature));
+                        humidity = Some(f32::from(r.relative_humidity));
+                        state.log_event("DHT11 read OK");
                     }
                     Err(e) => {
-                        log::warn!("DHT22 error: {:?}", e);
-                        state.log_event("DHT22 unavailable");
+                        log::warn!("DHT11 error: {:?}", e);
+                        state.log_event("DHT11 unavailable");
                         temperature = None;
                         humidity = None;
                     }
@@ -248,8 +248,8 @@ fn main() -> anyhow::Result<()> {
             if ml_ready {
                 if let (Some(temperature_c), Some(humidity_percent)) = (temperature, humidity) {
                     // The published demo model expects one float in [0, 2π] per inference.
-                    ml_demo::log_prediction("DHT22 temperature", (temperature_c + 40.0) / 120.0);
-                    ml_demo::log_prediction("DHT22 humidity", humidity_percent / 100.0);
+                    ml_demo::log_prediction("DHT11 temperature", (temperature_c + 40.0) / 120.0);
+                    ml_demo::log_prediction("DHT11 humidity", humidity_percent / 100.0);
                 } else {
                     ml_demo::log_prediction("battery voltage", battery_voltage / 5.0);
                 }

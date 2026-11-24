@@ -54,14 +54,16 @@ Los pines corresponden a ESP32-S3-WROOM-1 N16R8. GPIO19/20 quedan reservados par
 | OLED SSD1306 | VCC / GND | 3V3 / GND |
 | BMP280-3.3 | SDA / SCL | GPIO1 / GPIO2 (I2C1) |
 | BMP280-3.3 | VCC / GND | 3V3 / GND |
-| DHT22 | DATA | GPIO6 |
-| DHT22 | VCC / GND | 3V3 / GND |
-| GPS NEO-6M | TX | GPIO18 (RX del ESP32) |
-| GPS NEO-6M | RX (opcional) | GPIO17 (TX del ESP32) |
-| GPS NEO-6M | VCC / GND | Según el módulo / GND común |
+| DHT11 | DATA | GPIO6 |
+| DHT11 | VCC / GND | 3V3 / GND |
+| GPS GY-NEO6MV2 | TX | GPIO18 (RX del ESP32) |
+| GPS GY-NEO6MV2 | RX (opcional) | GPIO17 (TX del ESP32) |
+| GPS GY-NEO6MV2 | VCC / GND | Según el módulo / GND común |
 | Sensor de voltaje | S / salida analógica | A través del divisor adicional a GPIO4 (ADC1_CH3) |
 
 El ESP32, el GPS y los sensores deben compartir GND. El pin TX del GPS se conecta al RX del ESP32, y viceversa. Para recibir coordenadas basta conectar TX del GPS a GPIO18; RX del GPS puede quedar desconectado.
+
+En los diagramas, el conector del GY-NEO6MV2 se muestra de arriba abajo como VCC, RX, TX, GND, con la antena a la derecha. Comprueba la serigrafía del módulo físico antes de conectar.
 
 ## Conexión segura del sensor de voltaje
 
@@ -78,11 +80,11 @@ Comprueba el pinout de tu placa de voltaje antes de alimentarlo: existen variant
 
 El módulo medidor solo mide; no alimenta al ESP32. Alimenta el ESP32 desde la batería con un regulador DC-DC apropiado para la entrada de tu placa. Nunca conectes una batería directamente al pin 3V3.
 
-## DHT22 y GPS
+## DHT11 y GPS
 
-El DHT22 se consulta cada 2.5 segundos, como requiere este sensor. En un DHT22 sin placa adaptadora, agrega una resistencia pull-up de 4.7–10 kΩ entre DATA y 3V3. Muchos módulos de tres pines ya la incluyen.
+El DHT11 se consulta cada 2.5 segundos según la configuración del proyecto. En un DHT11 sin placa adaptadora, agrega una resistencia pull-up de 4.7–10 kΩ entre DATA y 3V3. Muchos módulos de tres pines ya la incluyen.
 
-El GPS NEO-6M usa UART2 a 9600 baudios, una configuración común de fábrica. La primera posición puede tardar y la antena suele necesitar vista despejada del cielo. Hasta que haya una posición reciente, ambas pantallas indican que el GPS está buscando señal.
+El GPS GY-NEO6MV2 usa UART2 a 9600 baudios, una configuración común de fábrica. La primera posición puede tardar y la antena suele necesitar vista despejada del cielo. Hasta que haya una posición reciente, ambas pantallas indican que el GPS está buscando señal.
 
 ## Preparar y cargar por CLI
 

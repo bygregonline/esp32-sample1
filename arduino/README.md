@@ -1,6 +1,6 @@
 # Monitor ESP32 para Arduino IDE
 
-Implementación para placa ESP32-S3 N16R8 de doble USB-C (16 MB flash, 8 MB PSRAM), con GPIO basados en la referencia ESP32-S3-DevKitC-1. Verifica el rotulado de la placa concreta antes de cablear. Incluye LCD Waveshare ST7789V2 de 170 × 320, OLED SSD1306 de 128 × 64, sensor DHT22, GPS NEO-6M y lectura analógica de batería.
+Implementación para placa ESP32-S3 N16R8 de doble USB-C (16 MB flash, 8 MB PSRAM), con GPIO basados en la referencia ESP32-S3-DevKitC-1. Verifica el rotulado de la placa concreta antes de cablear. Incluye LCD Waveshare ST7789V2 de 170 × 320, OLED SSD1306 de 128 × 64, sensor DHT11, GPS GY-NEO6MV2 y lectura analógica de batería.
 
 ## Diagramas y pantallas
 
@@ -62,7 +62,7 @@ En Linux el puerto suele ser `/dev/ttyUSB0`; en Windows, por ejemplo, `COM3`. Pa
    - **TinyGPSPlus**
 4. Abre `esp32_monitor/esp32_monitor.ino`, selecciona el puerto de la placa y pulsa **Verificar** o **Subir**.
 
-El LCD se maneja con Arduino_GFX y sus desplazamientos de 35 píxeles; la OLED usa Adafruit SSD1306. DHT22 y GPS se leen cada 2.5 s y continuamente, respectivamente. La batería se calcula con ocho lecturas calibradas de `analogReadMilliVolts`.
+El LCD se maneja con Arduino_GFX y sus desplazamientos de 35 píxeles; la OLED usa Adafruit SSD1306. DHT11 y GPS se leen cada 2.5 s y continuamente, respectivamente. La batería se calcula con ocho lecturas calibradas de `analogReadMilliVolts`.
 
 ## Pines
 
@@ -72,11 +72,13 @@ El LCD se maneja con Arduino_GFX y sus desplazamientos de 35 píxeles; la OLED u
 | LCD CS / DC / RST | GPIO10 / GPIO13 / GPIO14 |
 | LCD BL | 3V3 (luz fija) |
 | OLED I2C SDA / SCL | GPIO8 / GPIO9 |
-| DHT22 DATA | GPIO6 |
+| DHT11 DATA | GPIO6 |
 | GPS TX al RX del ESP32 | GPIO18 |
 | GPS RX desde TX del ESP32 (opcional) | GPIO17 |
 | Sensor de voltaje S | GPIO4 (ADC1_CH3) a través del divisor adicional |
 
-El GPS usa 9600 baudios y la OLED usa I2C `0x3C`. El DHT22 sin módulo requiere una resistencia pull-up de 4.7–10 kΩ entre DATA y 3V3. Para la entrada de batería, conecta una resistencia de 12 kΩ entre la salida `S` del módulo y GPIO4, y otra de 10 kΩ entre GPIO4 y GND. No conectes la salida del sensor ni la batería directamente al GPIO.
+El GPS usa 9600 baudios y la OLED usa I2C `0x3C`. El DHT11 sin módulo requiere una resistencia pull-up de 4.7–10 kΩ entre DATA y 3V3. Para la entrada de batería, conecta una resistencia de 12 kΩ entre la salida `S` del módulo y GPIO4, y otra de 10 kΩ entre GPIO4 y GND. No conectes la salida del sensor ni la batería directamente al GPIO.
+
+El conector GY-NEO6MV2 dibujado tiene los pines VCC, RX, TX y GND de arriba abajo, con la antena a la derecha. TX del GPS va a GPIO18 (RX del ESP32); RX del GPS puede conectarse a GPIO17 (TX del ESP32). Confirma la serigrafía de tu módulo.
 
 Los pines, desplazamientos y factores se pueden cambiar en `esp32_monitor/config.h`. Ajusta `VOLTAGE_CALIBRATION` comparando la lectura con un multímetro.

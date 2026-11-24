@@ -1,4 +1,4 @@
-"""Parser ligero para sentencias NMEA RMC y GGA de un GPS NEO-6M."""
+"""Parser ligero para sentencias NMEA RMC y GGA de un GPS GY-NEO6MV2."""
 
 from time import ticks_diff, ticks_ms
 

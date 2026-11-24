@@ -26,9 +26,9 @@ El montaje coloca el ESP32 al centro, las pantallas a la izquierda y los sensore
 
 - LCD Waveshare ST7789V2 de 170 × 320 por SPI, desplazamiento X 35.
 - OLED SSD1306 de 128 × 64 por I2C `0x3C`.
-- Lectura DHT22 con temporización por microsegundos.
+- Lectura DHT11 con temporización por microsegundos.
 - BMP280-3.3 en I²C1 GPIO1/2, con búsqueda en 0x76 y 0x77 y lectura de presión en hPa.
-- GPS NEO-6M por UART1 a 9600 baudios, con lectura RMC/GGA y verificación NMEA.
+- GPS GY-NEO6MV2 por UART1 a 9600 baudios, con lectura RMC/GGA y verificación NMEA.
 - ADC1 GPIO4 (ADC1_CH3) con calibración del ESP-IDF cuando el chip/compilación la ofrece.
 - Portal Wi-Fi protegido en SoftAP para elegir la red desde un navegador; las credenciales se guardan en NVS.
 - Servidor web local con panel HTML y endpoints JSON para sensores, GPS, Wi-Fi y clima.
@@ -46,7 +46,7 @@ Los pines y factores están en [`main/config.h`](main/config.h). Para el voltaje
 
 El firmware incluye el modelo de demostración [Hello World de TensorFlow Lite Micro](https://github.com/tensorflow/tflite-micro/tree/main/tensorflow/lite/micro/examples/hello_world), que aproxima `sin(x)`. Usamos TFLM para ejercitar inferencia `float32` en el CPU/FPU del ESP32-S3. Este chip tiene FPU, no TPU: la prueba valida la integración del runtime, pero no es una prueba de TPU, un benchmark de rendimiento, un pronóstico meteorológico ni una clasificación de sensores.
 
-Cada vez que se actualizan las lecturas, el firmware normaliza la temperatura y la humedad del DHT22 al rango esperado y las entrega al modelo en dos inferencias separadas, porque el modelo recibe un solo valor por vez. Si el DHT22 no está disponible, normaliza el voltaje de batería como entrada de respaldo. Las predicciones se registran en el monitor serial con la etiqueta `TFLM demo`; no modifican las pantallas ni los valores que entrega la API.
+Cada vez que se actualizan las lecturas, el firmware normaliza la temperatura y la humedad del DHT11 al rango esperado y las entrega al modelo en dos inferencias separadas, porque el modelo recibe un solo valor por vez. Si el DHT11 no está disponible, normaliza el voltaje de batería como entrada de respaldo. Las predicciones se registran en el monitor serial con la etiqueta `TFLM demo`; no modifican las pantallas ni los valores que entrega la API.
 
 La dependencia `espressif/esp-tflite-micro` está fijada en [`components/tflm_demo/idf_component.yml`](../components/tflm_demo/idf_component.yml), y el modelo y su interfaz compartida están en [`components/tflm_demo/`](../components/tflm_demo/). C y Rust enlazan el mismo componente; el intérprete está implementado en C++ y se llama desde ambas versiones mediante una interfaz C.
 
@@ -94,7 +94,7 @@ El perfil de simulación vive en `wokwi.toml` y `diagram.json` en la raíz del r
 
 En VS Code, abre la carpeta raíz del repositorio y ejecuta **Wokwi: Start Simulator** desde la paleta de comandos. El perfil usa su propio `c/build-wokwi/sdkconfig`, así que conserva separada la configuración de la placa real.
 
-El diagrama usa `Wokwi-GUEST` para la conexión de red. Con el reenvío configurado en `wokwi.toml`, abre `http://localhost:8180/` para el panel web y `http://localhost:8180/api/status` para el JSON. La pantalla a color simulada es una ILI9341 de 240 × 320, adaptada al área lógica de 170 × 320 del proyecto; la placa física sigue usando ST7789V2. Wokwi no proporciona aquí un módulo GPS del diagrama, así que el perfil usa coordenadas fijas de Ciudad de México. El DHT22 y el potenciómetro se pueden cambiar desde el simulador para variar humedad, temperatura y voltaje estimado.
+El diagrama usa `Wokwi-GUEST` para la conexión de red. Con el reenvío configurado en `wokwi.toml`, abre `http://localhost:8180/` para el panel web y `http://localhost:8180/api/status` para el JSON. La pantalla a color simulada es una ILI9341 de 240 × 320, adaptada al área lógica de 170 × 320 del proyecto; la placa física sigue usando ST7789V2. Wokwi no proporciona aquí un módulo GPS del diagrama, así que el perfil usa coordenadas fijas de Ciudad de México. El DHT22 de Wokwi sustituye al DHT11 físico; el perfil de simulación decodifica su formato y permite cambiar humedad y temperatura. El potenciómetro permite variar el voltaje estimado.
 
 La simulación permite revisar pantallas, sensores, servidor web, conexión Wi-Fi y consulta del clima con esos datos de prueba. No verifica el portal SoftAP ni el receptor GPS físico; esos se prueban con el perfil normal y el hardware correspondiente. Wokwi documenta el soporte de [proyectos ESP-IDF](https://docs.wokwi.com/vscode/esp-idf), la red [Wokwi-GUEST](https://docs.wokwi.com/guides/esp32-wifi) y los componentes [SSD1306](https://docs.wokwi.com/parts/board-ssd1306), [ILI9341](https://docs.wokwi.com/parts/wokwi-ili9341), [DHT22](https://docs.wokwi.com/parts/wokwi-dht22) y [potenciómetro](https://docs.wokwi.com/parts/wokwi-potentiometer).
 
@@ -112,7 +112,7 @@ El punto de configuración permanece activo para permitir cambiar la red desde e
 Endpoints disponibles:
 
 - `GET /` — panel HTML que se actualiza automáticamente y formulario Wi-Fi.
-- `GET /api/status` — JSON con batería, DHT22, GPS, Wi-Fi, pronóstico y cuenta regresiva.
+- `GET /api/status` — JSON con batería, DHT11, GPS, Wi-Fi, pronóstico y cuenta regresiva.
 - `GET /api/weather` — JSON solo con el pronóstico.
 - `POST /wifi` — recibe `ssid` y `password` como formulario `application/x-www-form-urlencoded`.
 

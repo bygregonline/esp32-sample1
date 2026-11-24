@@ -19,9 +19,10 @@
 
 Please note that **all `esp-idf-*` crates are a community effort**, in that Espressif puts little to no paid developer time in these.
 So while ESP-IDF itself is very popular and well tested, the `esp-idf-*` crates:
-- Might be a bit lagging behind the latest stable ESP-IDF version
-- Are (currently) missing HIL tests
-- Need more documentation
+
+* Might be a bit lagging behind the latest stable ESP-IDF version
+* Are (currently) missing HIL tests
+* Need more documentation
 
 For a HAL which is officially supported by Espressif (as in - with paid developer time), please look at [`esp-hal`](https://github.com/esp-rs/esp-hal). Keep in mind that `esp-hal` is `no_std`-only, does not use ESP-IDF and requires async programming.
 
@@ -35,8 +36,9 @@ The examples could be built and flashed conveniently with [`cargo-espflash`](htt
 (Swap the Rust target and example name with the target corresponding for your ESP32 MCU and with the example you would like to build)
 
 with `cargo-espflash`:
+
 ```sh
-$ MCU=esp32c3 cargo espflash flash --target riscv32imc-esp-espidf --example wifi --monitor
+MCU=esp32c3 cargo espflash flash --target riscv32imc-esp-espidf --example wifi --monitor
 ```
 
 | MCU | "--target" |
@@ -50,7 +52,6 @@ $ MCU=esp32c3 cargo espflash flash --target riscv32imc-esp-espidf --example wifi
 | esp32s2 | xtensa-esp32s2-espidf |
 | esp32s3 | xtensa-esp32s3-espidf |
 
-
 ## Setting up a "Hello, world!" binary crate with ESP IDF
 
 Use the [esp-idf-template](https://github.com/esp-rs/esp-idf-template) project. Everything would be arranged and built for you automatically - no need to manually clone the ESP IDF repository.
@@ -58,6 +59,7 @@ Use the [esp-idf-template](https://github.com/esp-rs/esp-idf-template) project. 
 ## More information
 
 For more information, check out:
+
 * The [Rust on ESP Book](https://esp-rs.github.io/book/)
 * The [ESP Embedded Training](https://github.com/esp-rs/espressif-trainings)
 * The [esp-idf-template](https://github.com/esp-rs/esp-idf-template) project

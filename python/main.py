@@ -1,7 +1,7 @@
 """Monitor ESP32 — MicroPython.
 
 Equivalente completo al C/ESP-IDF:
-  - Sensores: DHT22, GPS NEO-6M, ADC batería
+  - Sensores: DHT11, GPS GY-NEO6MV2, ADC batería
   - Displays: LCD ST7789V2 (170×320), OLED SSD1306 (128×64)
   - Wi-Fi STA + AP de configuración
   - Servidor HTTP embebido (usocket no bloqueante)
@@ -398,7 +398,7 @@ def render_lcd(lcd, st):
             lcd.text("HUM", 82, 52, CYAN)
             lcd.text("%.0f%%" % st["humidity_percent"], 106, 52, WHITE)
         else:
-            lcd.text("DHT22 SIN DATOS", 34, 52, YELLOW)
+            lcd.text("DHT11 SIN DATOS", 34, 52, YELLOW)
     _hline(lcd, 62)
 
     # GPS
@@ -986,7 +986,7 @@ def main():
     if bmp is None:
         log_event("BMP280 unavailable")
 
-    dht_sensor = dht.DHT22(Pin(config.DHT_PIN, Pin.IN, Pin.PULL_UP))
+    dht_sensor = dht.DHT11(Pin(config.DHT_PIN, Pin.IN, Pin.PULL_UP))
     gps_uart   = UART(config.GPS_UART_ID, baudrate=config.GPS_BAUDRATE,
                       bits=8, parity=None, stop=1,
                       tx=Pin(config.GPS_TX_PIN), rx=Pin(config.GPS_RX_PIN))
@@ -1044,7 +1044,7 @@ def main():
             last_read_ms = now
             _state["last_read_ms"] = now
 
-            # DHT22 — mínimo 2.5 s entre lecturas
+            # Separar las lecturas del DHT11 por 2.5 s.
             if ticks_diff(now, _state["_last_dht_ms"]) >= config.DHT_READ_INTERVAL_MS:
                 _state["_last_dht_ms"] = now
                 try:
@@ -1052,11 +1052,11 @@ def main():
                     _state["temperature_c"]    = dht_sensor.temperature()
                     _state["humidity_percent"] = dht_sensor.humidity()
                     _state["dht_valid"]        = True
-                    log_event("DHT22 read OK")
+                    log_event("DHT11 read OK")
                 except OSError as e:
-                    print("DHT22 error:", e)
+                    print("DHT11 error:", e)
                     _state["dht_valid"] = False
-                    log_event("DHT22 unavailable")
+                    log_event("DHT11 unavailable")
 
             _state["battery_v"] = read_battery_voltage(adc)
             try:

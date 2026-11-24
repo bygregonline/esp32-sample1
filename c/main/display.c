@@ -196,11 +196,11 @@ static void lcd_draw_refresh_ring(display_t *d, int cx, int cy, int radius, int 
 
 /* Miniature moon disk with a phase-shaped terminator for the color LCD. */
 static void lcd_draw_moon_icon(display_t *d, int cx, int cy, float phase, bool valid) {
-    const int radius = 10;
+    const int radius   = 10;
     const int diameter = radius * 2 + 1;
-    const float angle = (valid ? phase : 0.0f) * 6.28318530718f;
-    const float sun_x = sinf(angle);
-    const float sun_z = -cosf(angle);
+    const float angle  = (valid ? phase : 0.0f) * 6.28318530718f;
+    const float sun_x  = sinf(angle);
+    const float sun_z  = -cosf(angle);
     uint8_t row[21 * 2];
 
     for (int dy = -radius; dy <= radius; ++dy) {
@@ -210,21 +210,21 @@ static void lcd_draw_moon_icon(display_t *d, int cx, int cy, float phase, bool v
             const float r2 = nx * nx + ny * ny;
             uint16_t color = 0x0000;
             if (r2 <= 1.0f) {
-                const float nz = sqrtf(1.0f - r2);
-                const float light = nx * sun_x + nz * sun_z;
+                const float nz      = sqrtf(1.0f - r2);
+                const float light   = nx * sun_x + nz * sun_z;
                 const uint8_t shade = light > 0.0f ? (uint8_t)(175 + nz * 65) : 19;
                 color = rgb565(shade, shade, (uint8_t)(shade + (light > 0.0f ? 5 : 4)));
                 /* A few small maria/crater marks keep the disk recognizable. */
                 const float c1x = nx - 0.28f, c1y = ny + 0.25f;
                 const float c2x = nx + 0.35f, c2y = ny - 0.20f;
-                if (light > 0.0f && (c1x * c1x + c1y * c1y < 0.025f ||
-                                     c2x * c2x + c2y * c2y < 0.018f)) {
+                if (light > 0.0f &&
+                    (c1x * c1x + c1y * c1y < 0.025f || c2x * c2x + c2y * c2y < 0.018f)) {
                     const uint8_t crater = shade > 35 ? (uint8_t)(shade - 35) : shade;
-                    color = rgb565(crater, crater, crater);
+                    color                = rgb565(crater, crater, crater);
                 }
             }
-            const int pixel = dx + radius;
-            row[pixel * 2] = (uint8_t)(color >> 8);
+            const int pixel    = dx + radius;
+            row[pixel * 2]     = (uint8_t)(color >> 8);
             row[pixel * 2 + 1] = (uint8_t)color;
         }
         lcd_set_window(d, cx - radius, cy + dy, diameter, 1);
@@ -452,10 +452,11 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
     lcd_draw_hline(display, 46, C_DIM);
     /* Upper-right countdown ring shares the date/IP status band. */
     const int ring_cx = LCD_WIDTH - 21;
-    lcd_draw_refresh_ring(display, ring_cx, 23, 20, remaining,
-                          data->sensor_interval_seconds);
-    if (remaining >= 0) snprintf(text, sizeof(text), "%02d:%02d", remaining / 60, remaining % 60);
-    else snprintf(text, sizeof(text), "--:--");
+    lcd_draw_refresh_ring(display, ring_cx, 23, 20, remaining, data->sensor_interval_seconds);
+    if (remaining >= 0)
+        snprintf(text, sizeof(text), "%02d:%02d", remaining / 60, remaining % 60);
+    else
+        snprintf(text, sizeof(text), "--:--");
     for (size_t i = 0; text[i]; ++i)
         lcd_draw_char(display, text[i], ring_cx - 15 + (int)i * 6, 19, C_VALUE, 0x0000);
 
@@ -469,7 +470,7 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
             snprintf(text, sizeof(text), "%.0f%%", data->humidity_percent);
             lcd_draw_text(display, text, 106, 52, C_VALUE);
         } else {
-            lcd_draw_text(display, "DHT22 SIN DATOS", 34, 52, C_WARN);
+            lcd_draw_text(display, "DHT11 SIN DATOS", 34, 52, C_WARN);
         }
     }
     lcd_draw_hline(display, 62, C_DIM);
@@ -516,19 +517,18 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
                       data->bmp280_valid ? C_OK : C_DIM);
     }
     if (mask & DISPLAY_FIELD_MOON) {
-        const char *phase = !data->moon_phase_valid ? "--" :
-                            data->moon_phase < 0.035f || data->moon_phase >= 0.965f ? "NEW" :
-                            data->moon_phase < 0.22f ? "WAX CRES" :
-                            data->moon_phase < 0.28f ? "FIRST Q" :
-                            data->moon_phase < 0.47f ? "WAX GIB" :
-                            data->moon_phase < 0.53f ? "FULL" :
-                            data->moon_phase < 0.72f ? "WAN GIB" :
-                            data->moon_phase < 0.78f ? "LAST Q" : "WAN CRES";
-        snprintf(text, sizeof(text), "MOON %s %d%%", phase,
-                 data->moon_illumination_percent);
+        const char *phase = !data->moon_phase_valid                                   ? "--"
+                            : data->moon_phase < 0.035f || data->moon_phase >= 0.965f ? "NEW"
+                            : data->moon_phase < 0.22f                                ? "WAX CRES"
+                            : data->moon_phase < 0.28f                                ? "FIRST Q"
+                            : data->moon_phase < 0.47f                                ? "WAX GIB"
+                            : data->moon_phase < 0.53f                                ? "FULL"
+                            : data->moon_phase < 0.72f                                ? "WAN GIB"
+                            : data->moon_phase < 0.78f                                ? "LAST Q"
+                                                                                      : "WAN CRES";
+        snprintf(text, sizeof(text), "MOON %s %d%%", phase, data->moon_illumination_percent);
         lcd_draw_text(display, text, 4, 170, C_WEATHER);
-        lcd_draw_moon_icon(display, LCD_WIDTH - 16, 171, data->moon_phase,
-                           data->moon_phase_valid);
+        lcd_draw_moon_icon(display, LCD_WIDTH - 16, 171, data->moon_phase, data->moon_phase_valid);
     }
     lcd_draw_hline(display, 182, C_DIM);
 
@@ -547,11 +547,13 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
     /* Línea 0 — Wi-Fi */
     if (epoch > 1700000000 && localtime_r(&epoch, &local_time))
         strftime(text, sizeof(text), "%a %d %b %H:%M", &local_time);
-    else snprintf(text, sizeof(text), "TIME SYNCING");
+    else
+        snprintf(text, sizeof(text), "TIME SYNCING");
     oled_text(display, text, 0, 0);
 
     /* Línea 1 — Batería */
-    snprintf(text, sizeof(text), "IP %.15s", data->wifi_connected ? data->ip_address : "AP 192.168.4.1");
+    snprintf(text, sizeof(text), "IP %.15s",
+             data->wifi_connected ? data->ip_address : "AP 192.168.4.1");
     oled_text(display, text, 0, 8);
 
     /* Línea 2 — Temperatura y Humedad */
@@ -560,7 +562,7 @@ void display_render(display_t *display, const monitor_data_t *data, uint32_t now
             snprintf(text, sizeof(text), "T %.1fC H %.0f%%", data->temperature_c,
                      data->humidity_percent);
         } else {
-            snprintf(text, sizeof(text), "DHT22 SIN DATOS");
+            snprintf(text, sizeof(text), "DHT11 SIN DATOS");
         }
         oled_text(display, text, 0, 16);
     }

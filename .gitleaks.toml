@@ -7,6 +7,9 @@ description = "Allowlist for ESP32 project"
 regexes = [
   # Clave pública de ejemplo para el AP local de configuración
   '''monitor1234''',
+  # Nombre de variante de seguridad Bluetooth en el código vendorizado;
+  # no es una credencial.
+  '''Acceptor16DigitEncrypt''',
 ]
 paths = [
   '''.*\.example''',

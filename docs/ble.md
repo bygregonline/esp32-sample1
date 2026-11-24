@@ -27,7 +27,7 @@ Values fit within the standard 512-byte GATT attribute limit. The HTTP endpoints
 | Fields | Meaning |
 |--------|---------|
 | `time`, `ip`, `wifi`, `ssid` | Local clock, network address, connection state, and network name |
-| `battery_v`, `temp_c`, `hum_pct`, `pressure_hpa` | Battery voltage, DHT22 temperature/humidity, and BMP280 pressure in hPa |
+| `battery_v`, `temp_c`, `hum_pct`, `pressure_hpa` | Battery voltage, DHT11 temperature/humidity, and BMP280 pressure in hPa |
 | `lat`, `lon` | GPS degrees; null until a valid fix |
 | `forecast`, `wx_c`, `wx_hum_pct`, `wx_min_c`, `wx_max_c`, `rain_pct` | Weather summary, current conditions, daily range, and precipitation chance |
 | `moon`, `moon_illum_pct` | Lunar phase fraction (0 new, 0.5 full) and illumination percentage |

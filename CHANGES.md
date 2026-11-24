@@ -12,15 +12,15 @@ Fuente de verdad: **C/ESP-IDF**. Replicado a **Python/MicroPython** y **Rust/ESP
 - Campo `sensor_interval_seconds` — intervalo de ciclo de sensores (default 10 s, rango 5–300 s).
 - Campo `last_sensor_read_ms` — timestamp de la última lectura para calcular countdown.
 - Campo `display_fields_mask` — bitmask de visibilidad de secciones en ambos displays:
-  - `bit 0` = batería, `bit 1` = DHT22, `bit 2` = GPS, `bit 3` = clima
+  - `bit 0` = batería, `bit 1` = DHT11, `bit 2` = GPS, `bit 3` = clima
 - `monitor_state_set_sensor_interval()` — valida y aplica el nuevo intervalo.
 - `monitor_state_set_display_mask()` — actualiza la máscara de visibilidad.
 - `monitor_state_set_sensors()` ahora recibe `now_ms` para registrar timestamp.
 
 ### `main.c`
 
-- El bucle respeta `sensor_interval_seconds`: solo lee DHT22 y ADC cuando toca.
-- DHT22 mantiene su restricción interna de mínimo 2.5 s entre lecturas.
+- El bucle respeta `sensor_interval_seconds`: solo lee DHT11 y ADC cuando toca.
+- El firmware mantiene un intervalo de 2.5 s entre lecturas del DHT11.
 - Log incluye el ciclo activo en segundos.
 
 ### `display.c` — Layout rediseñado
@@ -138,8 +138,8 @@ Nuevas constantes: `SENSOR_INTERVAL_DEFAULT_S`, `SENSOR_INTERVAL_MIN_S`, `SENSOR
 
 | Feature | C | Python | Rust |
 |---------|---|--------|------|
-| DHT22 (temperatura/humedad) | ✅ | ✅ | ✅ |
-| GPS NEO-6M (NMEA RMC+GGA) | ✅ | ✅ | ✅ |
+| DHT11 (temperatura/humedad) | ✅ | ✅ | ✅ |
+| GPS GY-NEO6MV2 (NMEA RMC+GGA) | ✅ | ✅ | ✅ |
 | ADC batería (8 muestras) | ✅ | ✅ | ✅ |
 | LCD ST7789V2 render | ✅ | ✅ | ✅ |
 | OLED SSD1306 render | ✅ | ✅ | ✅ |

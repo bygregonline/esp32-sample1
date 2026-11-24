@@ -276,7 +276,7 @@ curl -X POST http://<IP>/api/config/display \
 ```
 
 > `display_mask` es el bitmask resultante:
-> bit 0 = batería, bit 1 = DHT22, bit 2 = GPS, bit 3 = clima, bit 4 = presión, bit 5 = fase lunar.
+> bit 0 = batería, bit 1 = DHT11, bit 2 = GPS, bit 3 = clima, bit 4 = presión, bit 5 = fase lunar.
 > `0x3F` (63) = todo visible. `0x00` = todo oculto.
 
 ---
