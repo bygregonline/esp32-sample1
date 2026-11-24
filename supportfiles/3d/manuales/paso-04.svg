@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<defs><marker id="blackArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12" fill="none" stroke="#111" stroke-width="2"/></marker><marker id="filledArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12 Z" fill="#111"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#111}.thin{fill:none;stroke:#111;stroke-width:2}.part{fill:#f7f7f7;stroke:#111;stroke-width:3}.detail{fill:#fff;stroke:#111;stroke-width:2}.label{font-size:19px;font-weight:700}.body{font-size:22px}.small{font-size:17px}</style>
+<rect width="1600" height="1000" fill="#fff"/>
+<text x="62" y="104" font-size="88" font-weight="700" fill="#111" text-anchor="start">04</text>
+<text x="170" y="78" font-size="36" font-weight="700" fill="#111" text-anchor="start">SUJETA LOS PANELES SOLARES</text>
+<text x="170" y="116" font-size="19" font-weight="400" fill="#536773" text-anchor="start">La placa trasera recibe seis clips; no perfores los paneles</text>
+<path d="M50 145 H1550" stroke="#111" stroke-width="2"/>
+<rect x="48" y="815" width="1504" height="140" rx="4" fill="#f7f7f7" stroke="#111" stroke-width="2"/>
+<path d="M510.0,552.8 L985.0,579.4 L985.0,799.4 L510.0,772.8 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M722.5,754.7 L772.5,757.5 L772.5,777.5 L722.5,774.7 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M586.2,613.9 L726.2,621.8 L726.2,741.8 L586.2,733.9 Z" fill="#e5e5e5" stroke="#111" stroke-width="3"/>
+<path d="M751.2,623.2 L891.2,631.0 L891.2,751.0 L751.2,743.2 Z" fill="#e5e5e5" stroke="#111" stroke-width="3"/>
+<path d="M554.6,633.3 L579.6,634.7 L579.6,654.7 L554.6,653.3 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M554.6,701.3 L579.6,702.7 L579.6,722.7 L554.6,721.3 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M719.6,642.6 L744.6,644.0 L744.6,664.0 L719.6,662.6 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M719.6,710.6 L744.6,712.0 L744.6,732.0 L719.6,730.6 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M884.6,651.8 L909.6,653.2 L909.6,673.2 L884.6,671.8 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M884.6,719.8 L909.6,721.2 L909.6,741.2 L884.6,739.8 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="1050" y="285" font-size="22" font-weight="700" fill="#172b3a" text-anchor="start">K × 2</text>
+<text x="1050" y="325" font-size="22" font-weight="700" fill="#172b3a" text-anchor="start">F × 6</text>
+<text x="1050" y="365" font-size="20" font-weight="700" fill="#172b3a" text-anchor="start">6 × M2 + tuerca</text>
+<circle cx="1300" cy="555" r="155" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="1300" y="430" font-size="17" font-weight="700" fill="#111" text-anchor="middle">DETALLE DEL CLIP</text>
+<rect x="1185" y="500" width="230" height="100" fill="#eee" stroke="#111" stroke-width="3"/>
+<rect x="1245" y="480" width="115" height="75" fill="#fff" stroke="#111" stroke-width="3"/>
+<path d="M1220 500 V475 H1255 M1350 555 H1385 V580" fill="none" stroke="#111" stroke-width="6"/>
+<path d="M1300 455 V535" stroke="#111" stroke-width="4" marker-end="url(#filledArrow)"/>
+<circle cx="1300" cy="570" r="12" fill="#fff" stroke="#111" stroke-width="3"/>
+<circle cx="83" cy="848" r="15" fill="#111"/>
+<text x="83" y="854" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+<text x="115" y="856" font-size="20" font-weight="400" fill="#111" text-anchor="start">Coloca los dos paneles K de 56 × 60 mm sobre la cara posterior.</text>
+<circle cx="83" cy="883" r="15" fill="#111"/>
+<text x="83" y="889" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+<text x="115" y="891" font-size="20" font-weight="400" fill="#111" text-anchor="start">Pon un clip F en cada uno de los seis puntos de fijación.</text>
+<circle cx="83" cy="918" r="15" fill="#111"/>
+<text x="83" y="924" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+<text x="115" y="926" font-size="20" font-weight="400" fill="#111" text-anchor="start">Aprieta seis tornillos M2 con sus tuercas y deja libre el paso USB.</text>
+</svg>

@@ -1,0 +1,26 @@
+# Lista de materiales · carcasa ESP32
+
+Cantidades para una unidad. Las piezas impresas siguen el CAD; valida las piezas comerciales con sus fichas técnicas antes de fabricar.
+
+| ID | Pieza | Cantidad | Medida / tamaño | Nota |
+|---|---|---:|---|---|
+| A | Panel frontal | 1 | 190 × 110 × 3 | Ventana LCD y OLED |
+| B | Panel posterior | 1 | 190 × 110 × 3 | Ranura USB 20 × 10 |
+| C | Base | 1 | 190 × 100 × 3 | Ranuras para correas ESP32 |
+| D | Tapa encajada | 1 | 190 × 65.0 × 7 | Alojamientos de cabeza M3 |
+| E | Lateral triangular | 2 | Perfil 100 × 110.6; ancho 14 | Insertos térmicos M3 |
+| F | Clip solar | 6 | 16 × 10 × 6 aprox. | Retención de panel sin perforarlo |
+| G | Tapón de tapa | 4 | Ø7 × 1 | Se instala después de apretar |
+| H | Placa ESP32-S3 | 1 | Según modelo comprado | Fijar con 2 correas |
+| I | LCD SPI ILI9488 3.5 in | 1 | PCB ref. 98 × 56.34 | Pitch de agujeros provisional |
+| J | OLED SSD1306 | 1 | Ventana 27 × 20 | Medir PCB real |
+| K | Panel solar Steren PS-003 | 2 | 56 × 60 × 3 | Medida de referencia |
+| L | Tornillo M3 × 8 Allen | 16 | Ø cabeza estándar 5.5 × 3 | 12 carcasa + 4 tapa; confirmar largo |
+| M | Inserto térmico M3 | 16 | Alojamiento CAD Ø4.2 × 9 | Elegir inserto y ajustar al fabricante |
+| N | Tornillo y tuerca M2 | 6 + 6 | Longitud según panel y clip | Clips solares |
+| O | Fijación M2.5 LCD | 4 juegos | Longitud según PCB | Tornillo + tuerca si el PCB lo requiere |
+| P | Fijación OLED | 4 juegos | Compatible con ranura 2.6 | M2 o correa según el PCB |
+| Q | Correa plástica | 2 | Ancho máx. 3 mm | Sujeción de ESP32 a la base |
+| R | Cable de alimentación USB | 1 | Conector debe pasar por 20 × 10 | Longitud según uso |
+
+El CAD incluye los agujeros y asientos. Confirma el largo de los M3 y las dimensiones del inserto térmico según las piezas que compres. No se incluyen batería ni controlador solar.

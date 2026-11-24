@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<defs><marker id="blackArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12" fill="none" stroke="#111" stroke-width="2"/></marker><marker id="filledArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12 Z" fill="#111"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#111}.thin{fill:none;stroke:#111;stroke-width:2}.part{fill:#f7f7f7;stroke:#111;stroke-width:3}.detail{fill:#fff;stroke:#111;stroke-width:2}.label{font-size:19px;font-weight:700}.body{font-size:22px}.small{font-size:17px}</style>
+<rect width="1600" height="1000" fill="#fff"/>
+<text x="62" y="104" font-size="88" font-weight="700" fill="#111" text-anchor="start">02</text>
+<text x="170" y="78" font-size="36" font-weight="700" fill="#111" text-anchor="start">FIJA FRENTE Y TRASERA</text>
+<text x="170" y="116" font-size="19" font-weight="400" fill="#536773" text-anchor="start">Las dos placas encajan entre los laterales y apoyan sobre la base</text>
+<path d="M50 145 H1550" stroke="#111" stroke-width="2"/>
+<rect x="48" y="815" width="1504" height="140" rx="4" fill="#f7f7f7" stroke="#111" stroke-width="2"/>
+<path d="M620.0,694.0 L1095.0,720.6 L985.0,800.6 L510.0,774.0 Z" fill="#ededed" stroke="#111" stroke-width="3"/>
+<path d="M585.0,692.0 L475.0,772.0 L475.0,550.8 L547.6,498.0 L585.0,680.0 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M1095.0,720.6 L985.0,800.6 L985.0,579.4 L1057.6,526.6 L1095.0,708.6 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M646.4,662.8 L1121.4,689.4 L1084.0,507.4 L609.0,480.8 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M708.1,617.2 L894.2,627.6 L877.3,544.9 L691.2,534.5 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M986.1,608.2 L1053.6,612.0 L1046.8,578.9 L979.3,575.1 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M483.6,572.0 L958.6,598.6 L958.6,818.6 L483.6,792.0 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M696.1,773.9 L746.1,776.7 L746.1,796.7 L696.1,793.9 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M892.7,563.7 L860.8,586.9" fill="none" stroke="#111" stroke-width="2" marker-end="url(#filledArrow)"/>
+<path d="M712.3,694.9 L744.2,671.7" fill="none" stroke="#111" stroke-width="2" marker-end="url(#filledArrow)"/>
+<text x="1040" y="285" font-size="21" font-weight="700" fill="#172b3a" text-anchor="start">A · FRENTE</text>
+<text x="1040" y="330" font-size="21" font-weight="700" fill="#172b3a" text-anchor="start">B · TRASERA</text>
+<circle cx="1290" cy="555" r="150" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="1290" y="432" font-size="17" font-weight="700" fill="#111" text-anchor="middle">ALINEA LOS ORIFICIOS</text>
+<path d="M1210 510 L1260 555 M1370 510 L1320 555" fill="none" stroke="#111" stroke-width="3" marker-end="url(#filledArrow)"/>
+<circle cx="1260" cy="555" r="12" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="1320" cy="555" r="12" fill="#fff" stroke="#111" stroke-width="3"/>
+<path d="M1260 555 H1320" stroke="#111" stroke-width="4"/>
+<circle cx="83" cy="848" r="15" fill="#111"/>
+<text x="83" y="854" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+<text x="115" y="856" font-size="20" font-weight="400" fill="#111" text-anchor="start">Pon A al frente y B en la parte posterior; deja la ranura USB abajo.</text>
+<circle cx="83" cy="883" r="15" fill="#111"/>
+<text x="83" y="889" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+<text x="115" y="891" font-size="20" font-weight="400" fill="#111" text-anchor="start">Haz coincidir los orificios de las placas con los insertos laterales.</text>
+<circle cx="83" cy="918" r="15" fill="#111"/>
+<text x="83" y="924" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+<text x="115" y="926" font-size="20" font-weight="400" fill="#111" text-anchor="start">Aprieta cuatro M3 × 8 en cada placa.</text>
+</svg>

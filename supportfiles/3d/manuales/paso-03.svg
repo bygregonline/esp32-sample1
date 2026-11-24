@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<defs><marker id="blackArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12" fill="none" stroke="#111" stroke-width="2"/></marker><marker id="filledArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12 Z" fill="#111"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#111}.thin{fill:none;stroke:#111;stroke-width:2}.part{fill:#f7f7f7;stroke:#111;stroke-width:3}.detail{fill:#fff;stroke:#111;stroke-width:2}.label{font-size:19px;font-weight:700}.body{font-size:22px}.small{font-size:17px}</style>
+<rect width="1600" height="1000" fill="#fff"/>
+<text x="62" y="104" font-size="88" font-weight="700" fill="#111" text-anchor="start">03</text>
+<text x="170" y="78" font-size="36" font-weight="700" fill="#111" text-anchor="start">MONTA LAS PANTALLAS</text>
+<text x="170" y="116" font-size="19" font-weight="400" fill="#536773" text-anchor="start">Los módulos se fijan por la cara interior del panel frontal</text>
+<path d="M50 145 H1550" stroke="#111" stroke-width="2"/>
+<rect x="48" y="815" width="1504" height="140" rx="4" fill="#f7f7f7" stroke="#111" stroke-width="2"/>
+<path d="M639.8,667.6 L1114.8,694.2 L1077.4,512.2 L602.4,485.6 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M701.5,622.0 L887.6,632.4 L870.7,549.7 L684.6,539.3 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M979.5,613.0 L1047.0,616.8 L1040.2,583.7 L972.7,579.9 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M635.5,654.2 L880.5,668.0 L861.3,574.7 L616.3,561.0 Z" fill="#e4e4e4" stroke="#111" stroke-width="2"/>
+<path d="M944.3,641.8 L1011.8,645.6 L1005.0,612.5 L937.5,608.7 Z" fill="#ddd" stroke="#111" stroke-width="2"/>
+<circle cx="643.7" cy="646.2" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="628.1" cy="570.1" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="868.7" cy="658.8" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="853.1" cy="582.7" r="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<text x="1040" y="310" font-size="21" font-weight="700" fill="#172b3a" text-anchor="start">LCD · 4 × M2.5</text>
+<text x="1040" y="350" font-size="20" font-weight="700" fill="#172b3a" text-anchor="start">OLED · 4 fijaciones</text>
+<circle cx="1285" cy="555" r="155" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="1285" y="430" font-size="17" font-weight="700" fill="#111" text-anchor="middle">VISTA DESDE DENTRO</text>
+<rect x="1200" y="480" width="170" height="115" rx="4" fill="#eee" stroke="#111" stroke-width="3"/>
+<rect x="1235" y="500" width="105" height="70" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="1222" cy="492" r="7" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="1222" cy="583" r="7" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="1348" cy="492" r="7" fill="#fff" stroke="#111" stroke-width="2"/>
+<circle cx="1348" cy="583" r="7" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M1170 540 H1220 M1410 540 H1360" stroke="#111" stroke-width="4" marker-end="url(#filledArrow)"/>
+<circle cx="83" cy="848" r="15" fill="#111"/>
+<text x="83" y="854" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+<text x="115" y="856" font-size="20" font-weight="400" fill="#111" text-anchor="start">Centra el LCD ILI9488 detrás de la ventana grande y usa sus cuatro soportes.</text>
+<circle cx="83" cy="883" r="15" fill="#111"/>
+<text x="83" y="889" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+<text x="115" y="891" font-size="20" font-weight="400" fill="#111" text-anchor="start">Ajusta la OLED en las ranuras; el patrón depende de la placa comprada.</text>
+<circle cx="83" cy="918" r="15" fill="#111"/>
+<text x="83" y="924" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+<text x="115" y="926" font-size="20" font-weight="400" fill="#111" text-anchor="start">Comprueba que las pantallas queden niveladas antes de cerrar.</text>
+</svg>

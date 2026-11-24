@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1450" viewBox="0 0 1800 1450">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto-start-reverse"><path d="M0 0 L9 4.5 L0 9 Z" fill="#236b91"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif}</style>
+<rect width="1800" height="1450" fill="#f7f8f5"/>
+<rect x="35" y="28" width="1730" height="108" rx="18" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="68" y="78" font-size="39" font-weight="700" fill="#172b3a" text-anchor="start">MONTAJE · PASO A PASO</text>
+<text x="68" y="115" font-size="21" font-weight="400" fill="#536773" text-anchor="start">Orden sugerido · flechas indican dirección de montaje · tornillos se muestran como cantidades, no instalados</text>
+<rect x="45" y="160" width="550" height="580" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="67" y="199" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">01 · PREPARA LAS PIEZAS</text>
+<rect x="80" y="270" width="112" height="56" rx="6" fill="#e8edef" stroke="#172b3a" stroke-width="2"/>
+<text x="136" y="307" font-size="22" font-weight="700" fill="#236b91" text-anchor="middle">A–C</text>
+<text x="215" y="306" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">frente · trasera · base</text>
+<rect x="80" y="355" width="112" height="56" rx="6" fill="#e8edef" stroke="#172b3a" stroke-width="2"/>
+<text x="136" y="392" font-size="22" font-weight="700" fill="#236b91" text-anchor="middle">D–E</text>
+<text x="215" y="391" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">tapa · laterales ×2</text>
+<rect x="80" y="440" width="112" height="56" rx="6" fill="#e8edef" stroke="#172b3a" stroke-width="2"/>
+<text x="136" y="477" font-size="22" font-weight="700" fill="#236b91" text-anchor="middle">F–G</text>
+<text x="215" y="476" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">clips ×6 · tapones ×4</text>
+<rect x="110" y="515" width="420" height="70" rx="8" fill="#f5f7f6" stroke="#9babb1" stroke-width="2"/>
+<text x="320" y="544" font-size="20" font-weight="700" fill="#d27818" text-anchor="middle">M3 × 8: 16 piezas</text>
+<text x="320" y="570" font-size="17" font-weight="400" fill="#172b3a" text-anchor="middle">M2 solar: 6 · insertos M3: 16</text>
+<text x="69" y="640" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Identifica A–G en la lista de materiales.</text>
+<text x="69" y="667" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• La tapa (D) encaja dentro de los laterales.</text>
+<text x="69" y="694" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• No instales los tapones todavía.</text>
+<rect x="625" y="160" width="550" height="580" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="647" y="199" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">02 · ARMA BASE Y LATERALES</text>
+<rect x="730" y="285" width="345" height="175" rx="8" fill="#dfe7e8" stroke="#172b3a" stroke-width="3"/>
+<text x="903" y="380" font-size="22" font-weight="700" fill="#236b91" text-anchor="middle">C · BASE</text>
+<path d="M790 252 L790 295 M1015 252 L1015 295" stroke="#d27818" stroke-width="4" marker-end="url(#arrow)"/>
+<path d="M755 510 L755 470 M1045 510 L1045 470" stroke="#d27818" stroke-width="4" marker-end="url(#arrow)"/>
+<text x="900" y="550" font-size="19" font-weight="700" fill="#d27818" text-anchor="middle">M3 × 8 · 4 tornillos</text>
+<text x="649" y="640" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Apoya C sobre una mesa.</text>
+<text x="649" y="667" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Alinea los dos laterales E con los bordes.</text>
+<text x="649" y="694" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Fija con 4 tornillos M3 × 8 desde abajo.</text>
+<rect x="1205" y="160" width="550" height="580" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="1227" y="199" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">03 · COLOCA FRENTE Y TRASERA</text>
+<rect x="1310" y="285" width="345" height="50" rx="6" fill="#e8edef" stroke="#172b3a" stroke-width="3"/>
+<text x="1483" y="318" font-size="18" font-weight="700" fill="#236b91" text-anchor="middle">A · FRENTE</text>
+<rect x="1310" y="465" width="345" height="50" rx="6" fill="#e8edef" stroke="#172b3a" stroke-width="3"/>
+<text x="1483" y="498" font-size="18" font-weight="700" fill="#236b91" text-anchor="middle">B · TRASERA</text>
+<rect x="1390" y="355" width="185" height="80" rx="8" fill="#f4f6f5" stroke="#172b3a" stroke-width="3"/>
+<text x="1483" y="402" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">E × 2</text>
+<path d="M1483 255 V280 M1483 555 V520" stroke="#d27818" stroke-width="4" marker-end="url(#arrow)"/>
+<text x="1483" y="575" font-size="19" font-weight="700" fill="#d27818" text-anchor="middle">M3 × 8 · 8 tornillos</text>
+<text x="1229" y="640" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Coloca A al frente y B atrás.</text>
+<text x="1229" y="667" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Alinea los orificios con los insertos.</text>
+<text x="1229" y="694" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Aprieta 8 tornillos M3 × 8.</text>
+<rect x="45" y="775" width="550" height="580" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="67" y="814" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">04 · MONTA LAS PANTALLAS</text>
+<rect x="140" y="915" width="360" height="220" rx="8" fill="#e8edef" stroke="#172b3a" stroke-width="3"/>
+<rect x="200" y="965" width="175" height="100" rx="5" fill="#dcecf1" stroke="#236b91" stroke-width="3"/>
+<rect x="410" y="990" width="60" height="50" rx="5" fill="#dcecf1" stroke="#236b91" stroke-width="3"/>
+<text x="287" y="1090" font-size="18" font-weight="700" fill="#236b91" text-anchor="middle">LCD</text>
+<text x="440" y="1061" font-size="16" font-weight="700" fill="#236b91" text-anchor="middle">OLED</text>
+<text x="320" y="1165" font-size="17" font-weight="700" fill="#d27818" text-anchor="middle">LCD: 4 × M2.5 · OLED: 4 fijaciones</text>
+<text x="320" y="1197" font-size="16" font-weight="400" fill="#172b3a" text-anchor="middle">ESP32: 2 correas por ranuras de la base</text>
+<text x="69" y="1255" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Fija el LCD desde el interior: 4 × M2.5.</text>
+<text x="69" y="1282" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Ajusta la OLED en sus ranuras: 4 fijaciones.</text>
+<text x="69" y="1309" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Asegura la placa con 2 correas en C.</text>
+<rect x="625" y="775" width="550" height="580" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="647" y="814" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">05 · FIJA LOS PANELES SOLARES</text>
+<rect x="730" y="935" width="345" height="220" rx="8" fill="#e8edef" stroke="#172b3a" stroke-width="3"/>
+<rect x="780" y="970" width="105" height="130" rx="4" fill="#d9e2f0" stroke="#236b91" stroke-width="2"/>
+<rect x="920" y="970" width="105" height="130" rx="4" fill="#d9e2f0" stroke="#236b91" stroke-width="2"/>
+<text x="832" y="1040" font-size="17" font-weight="700" fill="#236b91" text-anchor="middle">56 × 60</text>
+<text x="972" y="1040" font-size="17" font-weight="700" fill="#236b91" text-anchor="middle">56 × 60</text>
+<circle cx="770" cy="960" r="8" fill="#d27818"/>
+<circle cx="770" cy="1110" r="8" fill="#d27818"/>
+<circle cx="895" cy="960" r="8" fill="#d27818"/>
+<circle cx="895" cy="1110" r="8" fill="#d27818"/>
+<circle cx="1035" cy="960" r="8" fill="#d27818"/>
+<circle cx="1035" cy="1110" r="8" fill="#d27818"/>
+<rect x="885" y="1120" width="60" height="28" rx="14" fill="#fff" stroke="#d27818" stroke-width="3"/>
+<text x="900" y="1180" font-size="16" font-weight="700" fill="#d27818" text-anchor="middle">6 clips + 6 tornillos M2 + 6 tuercas</text>
+<text x="900" y="1210" font-size="15" font-weight="400" fill="#172b3a" text-anchor="middle">Deja libre la ranura USB de la parte baja</text>
+<text x="649" y="1255" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Pon 2 paneles K sobre B.</text>
+<text x="649" y="1282" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Retén con 6 clips F y tornillos/tuercas M2.</text>
+<text x="649" y="1309" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Mantén libre el paso USB 20 × 10 mm.</text>
+<rect x="1205" y="775" width="550" height="580" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="1227" y="814" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">06 · CIERRA CON LA TAPA</text>
+<rect x="1305" y="1005" width="350" height="105" rx="8" fill="#e8edef" stroke="#172b3a" stroke-width="3"/>
+<text x="1480" y="1065" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">CARCASA</text>
+<rect x="1320" y="880" width="320" height="55" rx="6" fill="#dfe6e7" stroke="#172b3a" stroke-width="3"/>
+<text x="1480" y="915" font-size="17" font-weight="700" fill="#236b91" text-anchor="middle">D · TAPA 190 × 65 mm</text>
+<path d="M1480 945 V990" stroke="#d27818" stroke-width="4" marker-end="url(#arrow)"/>
+<text x="1480" y="1145" font-size="15" font-weight="700" fill="#d27818" text-anchor="middle">M3: cabeza Ø5.5 × 3 → asiento Ø7.2 × 4</text>
+<text x="1480" y="1175" font-size="15" font-weight="400" fill="#172b3a" text-anchor="middle">Hombro de 3 mm: tope para apretar</text>
+<text x="1480" y="1205" font-size="15" font-weight="400" fill="#172b3a" text-anchor="middle">Poner tapón al final · cable por ranura USB</text>
+<text x="1229" y="1255" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Asienta D en los rebajes; tapa los laterales.</text>
+<text x="1229" y="1282" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Aprieta 4 tornillos M3 hasta el hombro.</text>
+<text x="1229" y="1309" font-size="16" font-weight="400" fill="#536773" text-anchor="start">• Presiona los 4 tapones G al final.</text>
+</svg>

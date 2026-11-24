@@ -827,6 +827,8 @@ The [closed CAD view](supportfiles/3d/preview-three-quarter.png), [uncapped CAD 
 
 The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [assembled STL](supportfiles/3d/esp32_mvp_assembly.stl) are included. Print the [front](supportfiles/3d/esp32_mvp_front.stl), [rear](supportfiles/3d/esp32_mvp_back.stl), [base](supportfiles/3d/esp32_mvp_base.stl), [inset top lid](supportfiles/3d/esp32_mvp_top.stl), four [top screw caps](supportfiles/3d/esp32_mvp_top_cap.stl), two [sides](supportfiles/3d/esp32_mvp_side.stl), and six [solar clips](supportfiles/3d/esp32_mvp_solar_clip.stl). The top lid has recessed M3 head seats with a 3 mm shoulder that holds each screw head during tightening. The solar positions use the Steren PS-003 reference dimensions of 56 × 60 × 3 mm. The rear USB-cable slot is 20 × 10 mm; check the actual plug before printing. See [supportfiles/3d/README.md](supportfiles/3d/README.md) for dimensions and fasteners.
 
+The IKEA-style [dimension sheet](supportfiles/3d/manuales/dimensiones-mm.png) includes a top view and screw-seat section for the lid. The [bill of materials](supportfiles/3d/manuales/lista-materiales.png) is also available as [Markdown](supportfiles/3d/manuales/lista-materiales.md) and [CSV](supportfiles/3d/manuales/lista-materiales.csv). Six line-art PNGs show assembly: [base and sides](supportfiles/3d/manuales/paso-01.png), [front and rear](supportfiles/3d/manuales/paso-02.png), [displays](supportfiles/3d/manuales/paso-03.png), [solar panels](supportfiles/3d/manuales/paso-04.png), [ESP32 and USB cable](supportfiles/3d/manuales/paso-05.png), and [top lid](supportfiles/3d/manuales/paso-06.png).
+
 ### CNC-cut acrylic prototype
 
 ![CNC-cut acrylic ESP32 telemetry enclosure concept](supportfiles/cnc/preview.png)
@@ -837,8 +839,8 @@ Both concepts are fit-check prototypes. Confirm that the purchased ILI9488 and S
 
 ## Repository snapshot
 
-- **Last source commit:** [`23fdc66`](https://github.com/bygregonline/esp32-sample1/commit/23fdc66c2a63d9ffcba3e2f1ff3b39013d71504a)
-- **Commit date:** 2026-11-24T08:12:47-06:00
-- **Repository size:** 23.2 MiB across 330 project files (generated `README.md` excluded)
+- **Last source commit:** [`4997469`](https://github.com/bygregonline/esp32-sample1/commit/4997469061bc9114247d7283e4aee4898668b7c6)
+- **Commit date:** 2026-11-24T08:53:08-06:00
+- **Repository size:** 24.7 MiB across 352 project files (generated `README.md` excluded)
 
 _Snapshot captured when this README was generated._

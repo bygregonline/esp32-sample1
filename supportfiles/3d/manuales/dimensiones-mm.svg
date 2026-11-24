@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1270" viewBox="0 0 1800 1270">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="4.5" refY="4.5" orient="auto-start-reverse"><path d="M0 0 L9 4.5 L0 9 Z" fill="#236b91"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif}</style>
+<rect width="1800" height="1270" fill="#f7f8f5"/>
+<rect x="35" y="28" width="1730" height="108" rx="18" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="68" y="78" font-size="39" font-weight="700" fill="#172b3a" text-anchor="start">01 · DIMENSIONES DE LA CARCASA</text>
+<text x="68" y="115" font-size="21" font-weight="400" fill="#536773" text-anchor="start">Todas las cotas están en milímetros · esquemas ortográficos · no escalar desde la imagen</text>
+<rect x="45" y="165" width="410" height="455" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="67" y="204" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">FRENTE</text>
+<rect x="475" y="165" width="410" height="455" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="497" y="204" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">TRASERA</text>
+<rect x="905" y="165" width="410" height="455" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="927" y="204" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">LATERAL</text>
+<rect x="1335" y="165" width="420" height="455" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="1357" y="204" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">TAPA SUPERIOR</text>
+<rect x="88" y="250" width="326.8" height="189.2" rx="0" fill="#eef1f1" stroke="#172b3a" stroke-width="3"/>
+<rect x="137.5016" y="301.6344" width="128.0368" height="85.9312" rx="3" fill="#dcecf1" stroke="#236b91" stroke-width="3"/>
+<rect x="332.24" y="327.4" width="46.44" height="34.4" rx="3" fill="#dcecf1" stroke="#236b91" stroke-width="3"/>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M88 439.2 V477.2 M414.8 439.2 V477.2"/><path d="M88 469.2 H414.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="251.4" y="460.2" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">190 mm</text></g>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M88 250 H58 M88 439.2 H58"/><path d="M66 250 V439.2" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="56" y="344.6" transform="rotate(-90 56 344.6)" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">110 mm</text></g>
+<text x="80" y="578" font-size="15" font-weight="400" fill="#536773" text-anchor="start">Ventanas: LCD 74.4 × 50 · OLED 27 × 20</text>
+<text x="80" y="598" font-size="15" font-weight="400" fill="#536773" text-anchor="start">Panel de 3 mm · pitch LCD aún provisional</text>
+<rect x="507" y="250" width="326.8" height="189.2" rx="0" fill="#eef1f1" stroke="#172b3a" stroke-width="3"/>
+<rect x="565.48" y="293.0" width="96.32" height="103.2" rx="3" fill="#d9e2f0" stroke="#236b91" stroke-width="2"/>
+<text x="613.64" y="348.03999999999996" font-size="15" font-weight="700" fill="#236b91" text-anchor="middle">56 × 60</text>
+<rect x="679.0" y="293.0" width="96.32" height="103.2" rx="3" fill="#d9e2f0" stroke="#236b91" stroke-width="2"/>
+<text x="727.16" y="348.03999999999996" font-size="15" font-weight="700" fill="#236b91" text-anchor="middle">56 × 60</text>
+<rect x="653.2" y="413.4" width="20" height="10" rx="5" fill="#fff" stroke="#d27818" stroke-width="3"/>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M507 439.2 V477.2 M833.8 439.2 V477.2"/><path d="M507 469.2 H833.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="670.4" y="460.2" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">190 mm</text></g>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M507 250 H479 M507 439.2 H479"/><path d="M487 250 V439.2" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="477" y="344.6" transform="rotate(-90 477 344.6)" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">110 mm</text></g>
+<text x="500" y="578" font-size="14" font-weight="400" fill="#536773" text-anchor="start">2 paneles · 56 × 60 × 3 mm · separación 10</text>
+<text x="500" y="598" font-size="14" font-weight="700" fill="#d27818" text-anchor="start">Ranura inferior de cable USB: 20 × 10 mm</text>
+<path d="M967.0,490.0 L1139.0,490.0 L1139.0,299.76800000000003 L1025.5144,299.76800000000003 L967.0,479.68 Z" fill="#e2e7e7" stroke="#172b3a" stroke-width="3"/>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M967 490 V528 M1139.0 490 V528"/><path d="M967 520 H1139.0" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="1053.0" y="511" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">100 mm</text></g>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M1139.0 299.76800000000003 H1156.0 M1139.0 490 H1156.0"/><path d="M1164.0 299.76800000000003 V490" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="1154.0" y="394.884" transform="rotate(-90 1154.0 394.884)" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">110.6 mm</text></g>
+<text x="1010" y="578" font-size="15" font-weight="400" fill="#536773" text-anchor="start">Laterales × 2 · espesor 14 mm</text>
+<text x="1010" y="598" font-size="15" font-weight="700" fill="#236b91" text-anchor="start">Inclinación del frente: 18°</text>
+<rect x="1350" y="300" width="370.5" height="126.711" rx="0" fill="#eef1f1" stroke="#172b3a" stroke-width="3"/>
+<rect x="1378.275" y="303.9" width="313.95" height="118.91099999999999" fill="none" stroke="#536773" stroke-width="2" stroke-dasharray="7 6"/>
+<circle cx="1363.65" cy="323.4" r="7.2" fill="#fff" stroke="#d27818" stroke-width="2.5"/>
+<circle cx="1363.65" cy="403.311" r="7.2" fill="#fff" stroke="#d27818" stroke-width="2.5"/>
+<circle cx="1706.85" cy="323.4" r="7.2" fill="#fff" stroke="#d27818" stroke-width="2.5"/>
+<circle cx="1706.85" cy="403.311" r="7.2" fill="#fff" stroke="#d27818" stroke-width="2.5"/>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M1350 426.711 V472.711 M1720.5 426.711 V472.711"/><path d="M1350 464.711 H1720.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="1535.25" y="455.711" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">190 mm</text></g>
+<g fill="none" stroke="#236b91" stroke-width="2"><path d="M1350 300 H1320 M1350 426.711 H1320"/><path d="M1328 300 V426.711" marker-start="url(#arrow)" marker-end="url(#arrow)"/><text x="1318" y="363.3555" transform="rotate(-90 1318 363.3555)" font-size="20" font-weight="700" fill="#236b91" text-anchor="middle">65.0 mm</text></g>
+<text x="1350" y="540" font-size="15" font-weight="700" fill="#d27818" text-anchor="start">4 asientos M3 · Ø7.2 × 4 mm</text>
+<text x="1350" y="564" font-size="15" font-weight="400" fill="#536773" text-anchor="start">Borde a centro: 7 mm × 12 mm</text>
+<text x="1350" y="588" font-size="14" font-weight="400" fill="#536773" text-anchor="start">Lengüeta inferior: 3 mm (línea punteada)</text>
+<rect x="45" y="650" width="1710" height="490" rx="14" fill="#fff" stroke="#ccd5d8" stroke-width="2"/>
+<text x="67" y="689" font-size="25" font-weight="700" fill="#172b3a" text-anchor="start">ESPESORES Y DETALLE DEL ASIENTO DE TORNILLO</text>
+<text x="78" y="730" font-size="21" font-weight="700" fill="#172b3a" text-anchor="start">PIEZAS</text>
+<text x="78" y="777" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">Frontal y trasera · 3 mm</text>
+<text x="78" y="817" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">Base · 3 mm</text>
+<text x="78" y="857" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">Tapa · 7 mm + lengüeta 3 mm</text>
+<text x="78" y="897" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">Clip solar · 16 × 10 × 6 mm aprox.</text>
+<text x="78" y="937" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">Ranuras de correas ESP32 · 3 × 10 mm</text>
+<text x="78" y="977" font-size="18" font-weight="400" fill="#172b3a" text-anchor="start">Ranura base · 24 × 9 mm</text>
+<text x="78" y="1035" font-size="17" font-weight="700" fill="#d27818" text-anchor="start">CONFIRMAR: M3, inserto y patrón de agujeros del LCD.</text>
+<text x="860" y="730" font-size="21" font-weight="700" fill="#172b3a" text-anchor="start">CORTE DE TAPA · M3 Y TAPÓN</text>
+<rect x="1000" y="790" width="330" height="168" rx="0" fill="#e8edef" stroke="#172b3a" stroke-width="3"/>
+<rect x="1100" y="790" width="130" height="96" fill="#fff" stroke="#d27818" stroke-width="3"/>
+<rect x="1134" y="886" width="62" height="72" fill="#fff" stroke="#236b91" stroke-width="3"/>
+<rect x="1115" y="814" width="100" height="72" rx="6" fill="#d7dcdf" stroke="#172b3a" stroke-width="2"/>
+<rect x="1100" y="790" width="130" height="24" rx="4" fill="#fff" stroke="#d27818" stroke-width="2"/>
+<text x="1370" y="816" font-size="16" font-weight="700" fill="#d27818" text-anchor="start">Tapón Ø7 × 1</text>
+<text x="1370" y="856" font-size="16" font-weight="700" fill="#d27818" text-anchor="start">Asiento Ø7.2 × 4</text>
+<text x="1370" y="896" font-size="16" font-weight="400" fill="#172b3a" text-anchor="start">Cabeza M3 ref. Ø5.5 × 3</text>
+<text x="1370" y="936" font-size="16" font-weight="700" fill="#236b91" text-anchor="start">Orificio pasante Ø3.4</text>
+<text x="1370" y="976" font-size="16" font-weight="700" fill="#236b91" text-anchor="start">Hombro de apoyo = 3 mm</text>
+<path d="M1080 890 H1005 M1180 965 H1005" fill="none" stroke="#236b91" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="860" y="1055" font-size="17" font-weight="400" fill="#536773" text-anchor="start">La cabeza apoya en el escalón; el tornillo aprieta contra el inserto del lateral.</text>
+<text x="860" y="1090" font-size="17" font-weight="700" fill="#d27818" text-anchor="start">Coloca los tapones al terminar el apriete.</text>
+</svg>

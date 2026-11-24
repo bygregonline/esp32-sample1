@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<defs><marker id="blackArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12" fill="none" stroke="#111" stroke-width="2"/></marker><marker id="filledArrow" markerWidth="13" markerHeight="13" refX="11" refY="6.5" orient="auto"><path d="M1 1 L12 6.5 L1 12 Z" fill="#111"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#111}.thin{fill:none;stroke:#111;stroke-width:2}.part{fill:#f7f7f7;stroke:#111;stroke-width:3}.detail{fill:#fff;stroke:#111;stroke-width:2}.label{font-size:19px;font-weight:700}.body{font-size:22px}.small{font-size:17px}</style>
+<rect width="1600" height="1000" fill="#fff"/>
+<text x="62" y="104" font-size="88" font-weight="700" fill="#111" text-anchor="start">06</text>
+<text x="170" y="78" font-size="36" font-weight="700" fill="#111" text-anchor="start">ENCAJA Y FIJA LA TAPA</text>
+<text x="170" y="116" font-size="19" font-weight="400" fill="#536773" text-anchor="start">La tapa entra entre los paneles y cubre los laterales</text>
+<path d="M50 145 H1550" stroke="#111" stroke-width="2"/>
+<rect x="48" y="815" width="1504" height="140" rx="4" fill="#f7f7f7" stroke="#111" stroke-width="2"/>
+<path d="M620.0,694.0 L1095.0,720.6 L985.0,800.6 L510.0,774.0 Z" fill="#ededed" stroke="#111" stroke-width="3"/>
+<path d="M585.0,692.0 L475.0,772.0 L475.0,550.8 L547.6,498.0 L585.0,680.0 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M1095.0,720.6 L985.0,800.6 L985.0,579.4 L1057.6,526.6 L1095.0,708.6 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M620.0,682.0 L1095.0,708.6 L1057.6,526.6 L582.6,500.0 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M681.7,636.4 L867.8,646.8 L850.9,564.1 L664.8,553.7 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M959.7,627.4 L1027.2,631.2 L1020.4,598.1 L952.9,594.3 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M510.0,552.8 L985.0,579.4 L985.0,799.4 L510.0,772.8 Z" fill="#f7f7f7" stroke="#111" stroke-width="3"/>
+<path d="M722.5,754.7 L772.5,757.5 L772.5,777.5 L722.5,774.7 Z" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M581.5,448.8 L1056.5,475.4 L985.0,527.4 L510.0,500.8 Z" fill="#f4f4f4" stroke="#111" stroke-width="3"/>
+<path d="M615.5,452.8 L1018.0,475.4 L951.0,524.1 L548.5,501.6 Z" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="7 6"/>
+<ellipse cx="585.8" cy="459.2" rx="8" ry="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<ellipse cx="540.7" cy="491.9" rx="8" ry="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<ellipse cx="1025.8" cy="483.8" rx="8" ry="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<ellipse cx="980.7" cy="516.6" rx="8" ry="5" fill="#fff" stroke="#111" stroke-width="2"/>
+<path d="M750 385 V455 M850 385 V455" stroke="#111" stroke-width="4" marker-end="url(#filledArrow)"/>
+<text x="1040" y="270" font-size="22" font-weight="700" fill="#172b3a" text-anchor="start">D · TAPA</text>
+<text x="1040" y="315" font-size="22" font-weight="700" fill="#172b3a" text-anchor="start">4 × M3 × 8</text>
+<text x="1040" y="360" font-size="19" font-weight="700" fill="#172b3a" text-anchor="start">4 tapones al final</text>
+<circle cx="1300" cy="550" r="170" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="1300" y="405" font-size="18" font-weight="700" fill="#111" text-anchor="middle">AMPLIACIÓN · CORTE</text>
+<rect x="1175" y="500" width="250" height="100" rx="0" fill="#eee" stroke="#111" stroke-width="3"/>
+<rect x="1250" y="500" width="100" height="58" fill="#fff" stroke="#111" stroke-width="3"/>
+<rect x="1286" y="558" width="28" height="42" fill="#fff" stroke="#111" stroke-width="3"/>
+<rect x="1278" y="600" width="44" height="28" fill="#ddd" stroke="#111" stroke-width="2"/>
+<rect x="1265" y="525" width="70" height="33" rx="5" fill="#ccc" stroke="#111" stroke-width="2"/>
+<rect x="1267" y="480" width="66" height="20" fill="#fff" stroke="#111" stroke-width="3"/>
+<text x="1300" y="475" font-size="14" font-weight="700" fill="#111" text-anchor="middle">tapón</text>
+<text x="1300" y="682" font-size="16" font-weight="700" fill="#111" text-anchor="middle">hombro de 3 mm</text>
+<path d="M1300 480 V550 M1300 462 L1300 442 L1372 442 L1372 465" fill="none" stroke="#111" stroke-width="6"/>
+<path d="M1372 442 A60 60 0 0 1 1416 480" fill="none" stroke="#111" stroke-width="4" marker-end="url(#blackArrow)"/>
+<circle cx="83" cy="848" r="15" fill="#111"/>
+<text x="83" y="854" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+<text x="115" y="856" font-size="20" font-weight="400" fill="#111" text-anchor="start">Asienta D dentro de los rebajes; la cara superior queda a ras.</text>
+<circle cx="83" cy="883" r="15" fill="#111"/>
+<text x="83" y="889" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+<text x="115" y="891" font-size="20" font-weight="400" fill="#111" text-anchor="start">Aprieta cuatro M3 hasta que la cabeza apoye en el hombro de 3 mm.</text>
+<circle cx="83" cy="918" r="15" fill="#111"/>
+<text x="83" y="924" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+<text x="115" y="926" font-size="20" font-weight="400" fill="#111" text-anchor="start">Presiona los cuatro tapones G después de apretar los tornillos.</text>
+</svg>

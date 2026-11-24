@@ -10,6 +10,29 @@ El modelo OpenSCAD muestra un frontal inclinado con una pantalla **ILI9488 SPI d
 
 La [vista CAD con tapa levantada](preview-open-three-quarter.png) permite inspeccionar el ensamble; la [vista sin tapones](preview-top-uncapped.png) enseña los cuatro alojamientos de los tornillos. La imagen realista es **conceptual**: textura y reflejos no sustituyen las medidas del CAD ni los STL.
 
+## Manual con cotas y materiales
+
+Las láminas PNG usan cotas en milímetros y muestran el orden de montaje:
+
+| Dimensiones | Materiales | Instrucciones estilo IKEA · paso 1 |
+|---|---|---|
+| ![Vistas frontal, posterior, lateral y superior de la tapa, acotadas en milímetros](manuales/dimensiones-mm.png) | ![Lista de materiales con cantidades y tamaños](manuales/lista-materiales.png) | ![Primer paso: unión de la base y los laterales, con detalle de tornillo](manuales/paso-01.png) |
+
+La lista también está disponible como [Markdown](manuales/lista-materiales.md) y [CSV](manuales/lista-materiales.csv). El script [generate_ikea_manual.py](generate_ikea_manual.py) genera estas láminas.
+
+### Instrucciones ilustradas estilo IKEA
+
+Seis PNG separados siguen el estilo lineal de la referencia `ikea.png`; incluyen piezas explotadas, flechas de montaje y ampliaciones de fijación.
+
+1. [Une la base y los laterales](manuales/paso-01.png)
+2. [Fija frente y trasera](manuales/paso-02.png)
+3. [Monta las pantallas](manuales/paso-03.png)
+4. [Sujeta los paneles solares](manuales/paso-04.png)
+5. [Fija la placa y pasa el cable](manuales/paso-05.png)
+6. [Encaja y fija la tapa](manuales/paso-06.png)
+
+La lámina de [dimensiones en mm](manuales/dimensiones-mm.png) ahora incluye la vista superior de la tapa (190 × 65 mm), la separación y posición de sus cuatro asientos M3, la lengüeta de encaje y el corte del hombro que detiene la cabeza del tornillo.
+
 ## Renders de ensamble
 
 Las flechas apuntan a los **orificios vacíos**; no se dibujan tornillos instalados. Azul = tornillos M3 de la carcasa; naranja = tornillos del LCD o de los clips solares.
