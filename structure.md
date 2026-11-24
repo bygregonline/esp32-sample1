@@ -849,13 +849,19 @@ The repository includes two enclosure concepts for the assembled MVP. The 3D-pri
 
 ### 3D-printed prototype
 
+![Three-quarter concept with the removable top fitted flush and its screws hidden](supportfiles/3d/preview-realistic-three-quarter.png)
+
+The [closed CAD view](supportfiles/3d/preview-three-quarter.png), [uncapped CAD view](supportfiles/3d/preview-top-uncapped.png), [open CAD view](supportfiles/3d/preview-open-three-quarter.png), and [rear CAD view](supportfiles/3d/preview-rear-three-quarter.png) show the inset removable lid and the low USB power-cable opening beneath the solar panels. Each top screw has a recessed head seat and a separate cover cap. The realistic image is a visual concept; use the CAD and STLs for printable dimensions.
+
 [![3D-printed ESP32 telemetry enclosure with ILI9488 and marked screw holes — click to rotate the STL on GitHub](supportfiles/3d/manual-front.png)](supportfiles/3d/esp32_mvp_assembly.stl)
 
 ![Rear face with two solar panels and arrows to the screw holes](supportfiles/3d/manual-back.png)
 
 ![Base with arrows to the four assembly screw holes](supportfiles/3d/manual-base.png)
 
-The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [assembled STL](supportfiles/3d/esp32_mvp_assembly.stl) are included. Print the [front](supportfiles/3d/esp32_mvp_front.stl), [rear](supportfiles/3d/esp32_mvp_back.stl), [base](supportfiles/3d/esp32_mvp_base.stl), two [sides](supportfiles/3d/esp32_mvp_side.stl), and six [solar clips](supportfiles/3d/esp32_mvp_solar_clip.stl). The front, rear, and base have aligned M3 assembly holes; the solar positions use the Steren PS-003 reference dimensions of 56 × 60 × 3 mm. See [supportfiles/3d/README.md](supportfiles/3d/README.md) for dimensions and fasteners.
+![Top lid with arrows to its four empty M3 screw holes](supportfiles/3d/manual-top.png)
+
+The editable [OpenSCAD model](supportfiles/3d/esp32_mvp_mount.scad) and its [assembled STL](supportfiles/3d/esp32_mvp_assembly.stl) are included. Print the [front](supportfiles/3d/esp32_mvp_front.stl), [rear](supportfiles/3d/esp32_mvp_back.stl), [base](supportfiles/3d/esp32_mvp_base.stl), [inset top lid](supportfiles/3d/esp32_mvp_top.stl), four [top screw caps](supportfiles/3d/esp32_mvp_top_cap.stl), two [sides](supportfiles/3d/esp32_mvp_side.stl), and six [solar clips](supportfiles/3d/esp32_mvp_solar_clip.stl). The top lid has recessed M3 head seats with a 3 mm shoulder that holds each screw head during tightening. The solar positions use the Steren PS-003 reference dimensions of 56 × 60 × 3 mm. The rear USB-cable slot is 20 × 10 mm; check the actual plug before printing. See [supportfiles/3d/README.md](supportfiles/3d/README.md) for dimensions and fasteners.
 
 ### CNC-cut acrylic prototype
 

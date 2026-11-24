@@ -1,6 +1,6 @@
 // ESP32-S3 desktop enclosure: landscape ILI9488, OLED, two rear solar panels.
 // Millimetres. Solar footprint: Steren PS-003, 56 x 60 x 3 mm.
-part = "visual"; // [visual,assembly,front,back,base,side,solar_clip]
+part = "visual"; // [visual,visual_uncapped,visual_open,assembly,front,back,base,top,top_cap,side,solar_clip]
 
 case_w = 190;
 face_h = 110;
@@ -15,6 +15,15 @@ m3_clearance = 3.4;
 m3_insert_bore = 4.2; // check chosen heat-set insert
 m2_clearance = 2.5;
 mount_x = 7;
+usb_slot_w = 20; // clearance for the power-cable plug; verify the actual connector
+usb_slot_h = 10;
+usb_slot_y = face_h-10;
+top_screw_inset = 12;
+top_t = 7;
+top_head_d = 7.2; // M3 socket head clearance; verify the selected screw
+top_head_depth = 4;
+top_cap_d = 7.0; // small removable cover, retained with a dab of adhesive
+top_cap_t = 1;
 
 // Reference SPI PCB 98 x 56.34; visible area 73.44 x 48.96; hole pitch 92 x 49.5.
 lcd_pcb_w = 98;
@@ -46,6 +55,7 @@ clip_h = 10;
 back_y = base_depth;
 front_top_y = face_h*sin(front_angle);
 front_top_z = front_bottom_z+face_h*cos(front_angle);
+top_front_y = front_top_y+1;
 
 assert(case_w >= 190, "Front display layout needs at least 190 mm of width");
 assert(case_w >= 2*solar_w+solar_gap+20, "Two solar panels need a wider case");
@@ -115,7 +125,45 @@ module back_panel() {
         cylinder(h=back_t+2,d=6,$fn=32);
     for (x=[48:16:144])
       translate([x,6,-1]) cube([5,5,back_t+2]);
+    // Low rear pass-through: between the two solar panels and above the base.
+    translate([case_w/2,usb_slot_y,-1]) hull()
+      for (x=[-(usb_slot_w-usb_slot_h)/2,(usb_slot_w-usb_slot_h)/2])
+        translate([x,0,0]) cylinder(h=back_t+2,d=usb_slot_h,$fn=32);
   }
+}
+
+module top_panel() {
+  difference() {
+    union() {
+      // The top surface is flush with the upper edges of the front and rear.
+      translate([0,top_front_y,0])
+        cube([case_w,back_y-top_front_y,top_t]);
+      // Shallow inner tongue locates the lid between the front, rear and sides.
+      translate([cheek_t+0.5,top_front_y+2,-3])
+        difference() {
+          cube([case_w-2*cheek_t-1,back_y-top_front_y-4,3]);
+          translate([2,2,-1])
+            cube([case_w-2*cheek_t-5,back_y-top_front_y-8,5]);
+        }
+    }
+    for (x=[mount_x,case_w-mount_x])
+      for (y=[top_front_y+top_screw_inset,back_y-top_screw_inset]) {
+        // The 3 mm shoulder below the counterbore stops the screw head.
+        translate([x,y,-4]) cylinder(h=top_t+5,d=m3_clearance,$fn=32);
+        translate([x,y,top_t-top_head_depth])
+          cylinder(h=top_head_depth+1,d=top_head_d,$fn=48);
+      }
+  }
+}
+
+module top_cap() {
+  cylinder(h=top_cap_t,d=top_cap_d,$fn=48);
+}
+
+module top_caps() {
+  for (x=[mount_x,case_w-mount_x])
+    for (y=[top_front_y+top_screw_inset,back_y-top_screw_inset])
+      translate([x,y,top_t-top_cap_t]) top_cap();
 }
 
 module base_panel() {
@@ -139,6 +187,9 @@ module side_cheek() {
       linear_extrude(height=cheek_t)
         polygon([[0,base_t],[back_y,base_t],[back_y,front_top_z],
                  [front_top_y,front_top_z],[0,front_bottom_z]]);
+    // Rebate receives the full lid thickness, leaving solid side support below.
+    translate([-1,top_front_y,front_top_z-top_t])
+      cube([cheek_t+2,back_y-top_front_y+1,top_t+1]);
     // Insert bores are coaxial with the front, rear and base clearance holes.
     front_pose() for (y=[12,face_h-12])
       translate([mount_x,y,-8])
@@ -149,6 +200,9 @@ module side_cheek() {
     for (y=[12,base_depth-12])
       translate([mount_x,y,base_t])
         cylinder(h=8,d=m3_insert_bore,$fn=32);
+    for (y=[top_front_y+top_screw_inset,back_y-top_screw_inset])
+      translate([mount_x,y,front_top_z-top_t-8])
+        cylinder(h=9,d=m3_insert_bore,$fn=32);
   }
 }
 
@@ -163,7 +217,7 @@ module solar_clip() {
   }
 }
 
-module assembled() {
+module assembled_without_top() {
   color("#3c424b") front_pose() front_panel();
   color("#424852") back_pose() back_panel();
   color("#303844") base_panel();
@@ -171,6 +225,11 @@ module assembled() {
   color("#343b45") translate([case_w,0,0]) mirror([1,0,0]) side_cheek();
   back_pose() clip_positions() color("#aab6c7")
     translate([0,0,back_t]) solar_clip();
+}
+
+module assembled() {
+  assembled_without_top();
+  color("#3f4650") translate([0,0,front_top_z-top_t]) top_panel();
 }
 
 module solar_visual(x) {
@@ -184,8 +243,7 @@ module solar_visual(x) {
         cube([(solar_w-6)/5-1,(solar_h-6)/4-1,0.2]);
 }
 
-module visual() {
-  assembled();
+module visual_details() {
   front_pose() {
     color("#164a6b") translate([lcd_x+(lcd_pcb_w-lcd_active_w)/2,
                                  lcd_y+(lcd_pcb_h-lcd_active_h)/2,-0.5])
@@ -199,11 +257,40 @@ module visual() {
   }
 }
 
+module visual() {
+  assembled();
+  visual_details();
+  color("#3f4650") translate([0,0,front_top_z-top_t]) top_caps();
+}
+
+module visual_uncapped() {
+  assembled();
+  visual_details();
+}
+
+// Removable lid is raised so the ESP32 and cable path can be inspected.
+module visual_open() {
+  assembled_without_top();
+  visual_details();
+  color("#3f4650") translate([0,-15,front_top_z+33-top_t]) top_panel();
+  color("#214e8a") translate([58,47,5]) cube([74,31,1.7]);
+  color("#b9bec5") translate([76,54,6.7]) cube([35,19,2]);
+  color("#15171b") translate([58,58,6.7]) cube([9,12,2]);
+  for (x=[62:5:128]) {
+    color("#d2a94a") translate([x,48,6.7]) cube([2,2,0.4]);
+    color("#d2a94a") translate([x,75,6.7]) cube([2,2,0.4]);
+  }
+}
+
 if (part == "visual") visual();
+if (part == "visual_uncapped") visual_uncapped();
+if (part == "visual_open") visual_open();
 if (part == "assembly") assembled();
 if (part == "front") translate([0,0,face_t]) mirror([0,0,1]) front_panel();
 if (part == "back") back_panel();
 if (part == "base") base_panel();
+if (part == "top") translate([0,-top_front_y,3]) top_panel();
+if (part == "top_cap") top_cap();
 if (part == "side")
   multmatrix([[0,1,0,0],[0,0,1,-base_t],[1,0,0,0],[0,0,0,1]])
     side_cheek();

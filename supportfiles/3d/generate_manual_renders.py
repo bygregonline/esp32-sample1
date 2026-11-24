@@ -155,7 +155,21 @@ def main() -> None:
         "",
         "Ranuras centrales: ESP32",
     )
-    print("Generated three annotated assembly renders")
+    manual(
+        "manual-top",
+        "preview-top-uncapped.png",
+        "04",
+        "Tapa superior · fijación",
+        "Cuatro M3 entran por la tapa hacia los insertos de ambos laterales.",
+        pair(
+            [(355, 365), (590, 210), (1130, 495), (1500, 300)],
+            [(477, 175), (591, 139), (1158, 307), (1254, 257)],
+        ),
+        [],
+        "",
+        "Tornillos aún sin instalar",
+    )
+    print("Generated four annotated assembly renders")
 
 
 if __name__ == "__main__":
